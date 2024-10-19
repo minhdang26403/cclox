@@ -5,6 +5,8 @@
 namespace cclox {
 
 // clang-format off
+
+// A map of reserved keywords in the Lox language.
 const std::unordered_map<std::string, TokenType> Scanner::keywords = {
     {"and", TokenType::AND},
     {"class",  TokenType::CLASS},
@@ -28,6 +30,7 @@ const std::unordered_map<std::string, TokenType> Scanner::keywords = {
 
 auto Scanner::ScanTokens() -> std::vector<Token> {
   while (!IsAtEnd()) {
+    // We are at the beginning of the next lexeme.
     start_ = current_;
     ScanToken();
   }
@@ -149,7 +152,6 @@ auto Scanner::Number() -> void {
   }
 
   Object value{std::stod(source_.substr(start_, current_ - start_))};
-  std::cout << value.ToString() << '\n';
   AddToken(TokenType::NUMBER, value);
 }
 
@@ -221,9 +223,6 @@ auto Scanner::AddToken(TokenType type) -> void {
 
 auto Scanner::AddToken(TokenType type, std::optional<Object> literal) -> void {
   std::string text = source_.substr(start_, current_ - start_);
-  // TODO(Dang): Remove debug log
-  // std::cout << start_ << ' ' << current_ << ": " << text << '\n';
-  tokens_.emplace_back(type, text, std::move(literal), line_number_);
+  tokens_.emplace_back(type, std::move(text), std::move(literal), line_number_);
 }
-
 }  // namespace cclox

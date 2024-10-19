@@ -12,8 +12,8 @@ namespace cclox {
 
 bool cclox::Lox::had_error = false;
 
-auto Lox::RunFile(const std::string& filepath) -> void {
-  std::ifstream file{filepath};
+auto Lox::RunFile(const std::string& path) -> void {
+  std::ifstream file{path};
   std::stringstream buffer;
   buffer << file.rdbuf();
   Run(buffer.str());
@@ -45,13 +45,12 @@ auto Lox::Error(uint32_t line_number, const std::string& message) -> void {
 }
 
 auto Lox::Run(std::string source) -> void {
-  Scanner scanner{source};
+  Scanner scanner{std::move(source)};
   std::vector<Token> tokens = scanner.ScanTokens();
 
-  // TODO(Dang): remove
-  // for (const auto& token : tokens) {
-  //   std::cout << token << '\n';
-  // }
+  for (const auto& token : tokens) {
+    std::cout << token << '\n';
+  }
 }
 
 auto Lox::Report(uint32_t line_number, const std::string& where,
