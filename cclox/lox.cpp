@@ -6,13 +6,15 @@
 #include <iostream>
 #include <sstream>
 
+#include "parser.h"
 #include "scanner.h"
+#include "token_type.h"
 
 namespace cclox {
 
 bool cclox::Lox::had_error = false;
 
-auto Lox::RunFile(const std::string& path) -> void {
+auto Lox::RunFile(std::string_view path) -> void {
   std::ifstream file{path};
   std::stringstream buffer;
   buffer << file.rdbuf();
@@ -38,23 +40,35 @@ auto Lox::RunPrompt() -> void {
   }
 }
 
-// =========================Private Methods=========================
-
-auto Lox::Error(uint32_t line_number, const std::string& message) -> void {
+auto Lox::Error(uint32_t line_number, std::string_view message) -> void {
   Report(line_number, "", message);
 }
+
+auto Lox::Error(const Token& token, std::string_view message) -> void {
+  if (token.GetType() == TokenType::EoF) {
+    Report(token.GetLineNumber(), " at end", message);
+  } else {
+    Report(token.GetLineNumber(), std::format(" at '{}'", token.GetLexeme()),
+           message);
+  }
+}
+
+// =========================Private Methods=========================
 
 auto Lox::Run(std::string source) -> void {
   Scanner scanner{std::move(source)};
   std::vector<Token> tokens = scanner.ScanTokens();
+  Parser parser{std::move(tokens)};
+  ExprPtr expression = parser.Parse();
 
-  for (const auto& token : tokens) {
-    std::cout << token << '\n';
+  // Stop if there was a syntax error.
+  if (had_error) {
+    return;
   }
 }
 
-auto Lox::Report(uint32_t line_number, const std::string& where,
-                 const std::string& message) -> void {
+auto Lox::Report(uint32_t line_number, std::string_view where,
+                 std::string_view message) -> void {
   std::cout << std::format("[line {}] Error{}: {}\n", line_number, where,
                            message);
 }

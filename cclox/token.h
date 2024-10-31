@@ -31,6 +31,30 @@ class Token {
         line_number_(line_number) {}
 
   /**
+   * @brief Gets the type of this token.
+   * @return the token type.
+   */
+  auto GetType() const noexcept -> TokenType;
+
+  /**
+   * @brief Gets the lexeme of this token.
+   * @return the lexeme.
+   */
+  auto GetLexeme() const noexcept -> std::string;
+
+  /**
+   * @brief Gets the literal value of this token.
+   * @return the literal value.
+   */
+  auto GetLiteral() const -> Object;
+
+  /**
+   * @brief Gets the line number of this token.
+   * @return the line number
+   */
+  auto GetLineNumber() const noexcept -> uint32_t;
+
+  /**
    * @brief Returns a string representation of the token. This method converts
    * the token's type, lexeme, and literal value into a human-readable string
    * format.
@@ -54,7 +78,7 @@ class Token {
   // The literal value associated with the token, if any.
   std::optional<Object> literal_;
   // The line number where the token was found.
-  [[maybe_unused]] uint32_t line_number_;
+  uint32_t line_number_;
 };
 
 }  // namespace cclox

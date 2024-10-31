@@ -21,7 +21,7 @@ class Scanner {
    * @brief Constructs a Scanner object with the provided source code.
    * @param source the source code to scan.
    */
-  Scanner(std::string source) : source_(std::move(source)) {}
+  explicit Scanner(std::string source) : source_(std::move(source)) {}
 
   /**
    * @brief Scans the source code and returns a list of tokens.
@@ -34,7 +34,7 @@ class Scanner {
    * @brief Checks if the scanner has reached the end of the source code.
    * @return true if the scanner is at the end of the source, false otherwise.
    */
-  auto IsAtEnd() const -> bool;
+  auto IsAtEnd() const noexcept -> bool;
 
   /**
    * @brief Reads characters from the source, determines what type of token they
@@ -46,18 +46,18 @@ class Scanner {
    * @brief Reads characters that form an identifier and checks if the read
    * identifier matches any reserved keywords.
    */
-  auto Identifier() -> void;
+  auto ScanIdentifier() -> void;
 
   /**
    * @brief Reads characters that represent a numeric literal, including integer
    * and fractional parts.
    */
-  auto Number() -> void;
+  auto ScanNumber() -> void;
 
   /**
    * @brief Processes a string literal from the source code.
    */
-  auto String() -> void;
+  auto ScanString() -> void;
 
   /**
    * @brief Compares the current character with the expected character. Only
@@ -66,19 +66,19 @@ class Scanner {
    * @return true if the current character matches the expected character, false
    * otherwise.
    */
-  auto Match(char expected) -> bool;
+  auto Match(char expected) noexcept -> bool;
 
   /**
    * @brief Peeks at the current character in the source code without advancing.
    * @return the current character in the source code, or '\0' if at the end.
    */
-  auto Peek() const -> char;
+  auto Peek() const noexcept -> char;
 
   /**
    * @brief Peeks at the next character in the source code without advancing.
    * @return the next character in the source code, or '\0' if at the end.
    */
-  auto PeekNext() const -> char;
+  auto PeekNext() const noexcept -> char;
 
   /**
    * @brief Checks if the given character is an uppercase or lowercase letter
@@ -86,14 +86,14 @@ class Scanner {
    * @param c the character to check.
    * @return true if the character is alphabetic, false otherwise.
    */
-  auto IsAlpha(char c) const -> bool;
+  auto IsAlpha(char c) const noexcept -> bool;
 
   /**
    * @brief Checks if the given character is a numeric digit (0-9).
    * @param c the character to check.
    * @return true if the character is a digit, false otherwise.
    */
-  auto IsDigit(char c) const -> bool;
+  auto IsDigit(char c) const noexcept -> bool;
 
   /**
    * @brief Checks if the given character is either an alphabetic character
@@ -101,14 +101,14 @@ class Scanner {
    * @param c the character to check.
    * @return true if the character is alphanumeric, false otherwise.
    */
-  auto IsAlphaNumeric(char c) -> bool;
+  auto IsAlphaNumeric(char c) const noexcept -> bool;
 
   /**
    * @brief Returns the current character and then advances
    * the scanner to the next character in the source code.
    * @return the current character before advancing.
    */
-  auto Advance() -> char;
+  auto Advance() noexcept -> char;
 
   /**
    * @brief Creates a token of the given type and adds it to the list of tokens.

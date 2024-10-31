@@ -2,6 +2,7 @@
 add_library(lox
   lox.cpp
   object.cpp
+  parser.cpp
   scanner.cpp
   token.cpp)
 

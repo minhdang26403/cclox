@@ -39,7 +39,7 @@ auto Scanner::ScanTokens() -> std::vector<Token> {
   return tokens_;
 }
 
-auto Scanner::IsAtEnd() const -> bool {
+auto Scanner::IsAtEnd() const noexcept -> bool {
   return current_ >= source_.size();
 }
 
@@ -108,13 +108,13 @@ auto Scanner::ScanToken() -> void {
       line_number_++;
       break;
     case '"':
-      String();
+      ScanString();
       break;
     default:
       if (IsDigit(c)) {
-        Number();
+        ScanNumber();
       } else if (IsAlpha(c)) {
-        Identifier();
+        ScanIdentifier();
       } else {
         Lox::Error(line_number_, "Unexpected character.");
       }
@@ -122,7 +122,7 @@ auto Scanner::ScanToken() -> void {
   }
 }
 
-auto Scanner::Identifier() -> void {
+auto Scanner::ScanIdentifier() -> void {
   while (IsAlphaNumeric(Peek())) {
     Advance();
   }
@@ -136,7 +136,7 @@ auto Scanner::Identifier() -> void {
   AddToken(type);
 }
 
-auto Scanner::Number() -> void {
+auto Scanner::ScanNumber() -> void {
   while (IsDigit(Peek())) {
     Advance();
   }
@@ -155,7 +155,7 @@ auto Scanner::Number() -> void {
   AddToken(TokenType::NUMBER, value);
 }
 
-auto Scanner::String() -> void {
+auto Scanner::ScanString() -> void {
   while (Peek() != '"' && !IsAtEnd()) {
     if (Peek() != '\n') {
       line_number_++;
@@ -176,7 +176,7 @@ auto Scanner::String() -> void {
   AddToken(TokenType::STRING, value);
 }
 
-auto Scanner::Match(char expected) -> bool {
+auto Scanner::Match(char expected) noexcept -> bool {
   if (IsAtEnd() || source_[current_] != expected) {
     return false;
   }
@@ -185,7 +185,7 @@ auto Scanner::Match(char expected) -> bool {
   return true;
 }
 
-auto Scanner::Peek() const -> char {
+auto Scanner::Peek() const noexcept -> char {
   if (IsAtEnd()) {
     return '\0';
   }
@@ -193,7 +193,7 @@ auto Scanner::Peek() const -> char {
   return source_[current_];
 }
 
-auto Scanner::PeekNext() const -> char {
+auto Scanner::PeekNext() const noexcept -> char {
   if (current_ + 1 >= source_.size()) {
     return '\0';
   }
@@ -201,19 +201,19 @@ auto Scanner::PeekNext() const -> char {
   return source_[current_ + 1];
 }
 
-auto Scanner::IsAlpha(char c) const -> bool {
+auto Scanner::IsAlpha(char c) const noexcept -> bool {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
-auto Scanner::IsDigit(char c) const -> bool {
+auto Scanner::IsDigit(char c) const noexcept -> bool {
   return c >= '0' && c <= '9';
 }
 
-auto Scanner::IsAlphaNumeric(char c) -> bool {
+auto Scanner::IsAlphaNumeric(char c) const noexcept -> bool {
   return IsAlpha(c) || IsDigit(c);
 }
 
-auto Scanner::Advance() -> char {
+auto Scanner::Advance() noexcept -> char {
   return source_[current_++];
 }
 

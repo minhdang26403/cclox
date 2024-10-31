@@ -1,6 +1,7 @@
 #ifndef OBJECT_H_
 #define OBJECT_H_
 
+#include <cstddef>
 #include <string>
 #include <type_traits>
 #include <variant>
@@ -13,9 +14,11 @@ namespace cclox {
 class Object {
  public:
   /**
-   * @brief Defines the type of object, which can be an int, double, or string.
+   * @brief Defines the type of object, which can be boolean, null pointer, integer,
+   * double, or string.
    */
-  using ObjectType = std::variant<int, double, std::string>;
+  using ObjectType =
+      std::variant<bool, std::nullptr_t, int, double, std::string>;
 
   /**
    * @brief Constructs an Object with a value of type T. The type T must not be
