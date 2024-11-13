@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "ast_printer.h"
 #include "parser.h"
 #include "scanner.h"
 #include "token_type.h"
@@ -58,18 +59,25 @@ auto Lox::Error(const Token& token, std::string_view message) -> void {
 auto Lox::Run(std::string source) -> void {
   Scanner scanner{std::move(source)};
   std::vector<Token> tokens = scanner.ScanTokens();
-  Parser parser{std::move(tokens)};
-  ExprPtr expression = parser.Parse();
-
-  // Stop if there was a syntax error.
+  // Stop if there was a lexing error
   if (had_error) {
     return;
   }
+
+  Parser parser{std::move(tokens)};
+  ExprPtr expression = parser.Parse();
+  // Stop if there was a parsing error.
+  if (had_error) {
+    return;
+  }
+
+  std::cout << ASTPrinter::ToStringExpr(expression) << '\n';
 }
 
 auto Lox::Report(uint32_t line_number, std::string_view where,
                  std::string_view message) -> void {
   std::cout << std::format("[line {}] Error{}: {}\n", line_number, where,
                            message);
+  had_error = true;
 }
 }  // namespace cclox

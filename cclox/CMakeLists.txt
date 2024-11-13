@@ -4,7 +4,8 @@ add_library(lox
   object.cpp
   parser.cpp
   scanner.cpp
-  token.cpp)
+  token.cpp
+  ast_printer.cpp)
 
 # Define the executable
 add_executable(cclox shell.cpp)
