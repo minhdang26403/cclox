@@ -64,6 +64,11 @@ auto Lox::Run(std::string source) -> void {
     return;
   }
 
+  // TODO(Dang): Maybe remove debug code
+  for (const auto& token : tokens) {
+    std::cout << TokenTypeToString(token.GetType()) << '\n';
+  }
+
   Parser parser{std::move(tokens)};
   ExprPtr expression = parser.Parse();
   // Stop if there was a parsing error.
