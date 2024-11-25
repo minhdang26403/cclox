@@ -136,7 +136,7 @@ class Object {
 
   /**
    * @brief Returns the string representation of the stored value.
-   * @return a string representation of the stored value.
+   * @return A string representation of the stored value.
    */
   auto ToString() const -> std::string;
 

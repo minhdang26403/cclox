@@ -19,13 +19,13 @@ class Scanner {
  public:
   /**
    * @brief Constructs a Scanner object with the provided source code.
-   * @param source the source code to scan.
+   * @param source The source code to scan.
    */
   explicit Scanner(std::string source) : source_(std::move(source)) {}
 
   /**
    * @brief Scans the source code and returns a list of tokens.
-   * @return a vector containing all the tokens scanned from the source code.
+   * @return A vector containing all the tokens scanned from the source code.
    */
   auto ScanTokens() -> std::vector<Token>;
 
@@ -62,7 +62,7 @@ class Scanner {
   /**
    * @brief Compares the current character with the expected character. Only
    * consumes the current character if they match.
-   * @param expected the character to compare against the current character.
+   * @param expected The character to compare against the current character.
    * @return true if the current character matches the expected character, false
    * otherwise.
    */
@@ -70,27 +70,27 @@ class Scanner {
 
   /**
    * @brief Peeks at the current character in the source code without advancing.
-   * @return the current character in the source code, or '\0' if at the end.
+   * @return The current character in the source code, or '\0' if at the end.
    */
   auto Peek() const noexcept -> char;
 
   /**
    * @brief Peeks at the next character in the source code without advancing.
-   * @return the next character in the source code, or '\0' if at the end.
+   * @return The next character in the source code, or '\0' if at the end.
    */
   auto PeekNext() const noexcept -> char;
 
   /**
    * @brief Checks if the given character is an uppercase or lowercase letter
    * (A-Z, a-z).
-   * @param c the character to check.
+   * @param c The character to check.
    * @return true if the character is alphabetic, false otherwise.
    */
   auto IsAlpha(char c) const noexcept -> bool;
 
   /**
    * @brief Checks if the given character is a numeric digit (0-9).
-   * @param c the character to check.
+   * @param c The character to check.
    * @return true if the character is a digit, false otherwise.
    */
   auto IsDigit(char c) const noexcept -> bool;
@@ -98,7 +98,7 @@ class Scanner {
   /**
    * @brief Checks if the given character is either an alphabetic character
    * (A-Z, a-z) or a digit (0-9).
-   * @param c the character to check.
+   * @param c The character to check.
    * @return true if the character is alphanumeric, false otherwise.
    */
   auto IsAlphaNumeric(char c) const noexcept -> bool;
@@ -106,21 +106,21 @@ class Scanner {
   /**
    * @brief Returns the current character and then advances
    * the scanner to the next character in the source code.
-   * @return the current character before advancing.
+   * @return The current character before advancing.
    */
   auto Advance() noexcept -> char;
 
   /**
    * @brief Creates a token of the given type and adds it to the list of tokens.
-   * @param type the type of token to add.
+   * @param type The type of token to add.
    */
   auto AddToken(TokenType type) -> void;
 
   /**
    * @brief Creates a token of the given type with an associated literal value,
    * and adds it to the list of tokens.
-   * @param type the type of token to add.
-   * @param literal the literal value associated with the token.
+   * @param type The type of token to add.
+   * @param literal The literal value associated with the token.
    */
   auto AddToken(TokenType type, std::optional<Object> literal) -> void;
 

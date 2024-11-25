@@ -16,11 +16,11 @@ class Token {
  public:
   /**
    * @brief Constructs a Token object.
-   * @param type the type of the token (e.g., keyword, identifier, symbol).
-   * @param lexeme the textual representation of the token.
-   * @param literal the optional literal value associated with the token, if
+   * @param type The type of the token (e.g., keyword, identifier, symbol).
+   * @param lexeme The textual representation of the token.
+   * @param literal The optional literal value associated with the token, if
    * any.
-   * @param line_number the line number in the source code where the token
+   * @param line_number The line number in the source code where the token
    * appears.
    */
   Token(TokenType type, std::string lexeme, std::optional<Object> literal,
@@ -32,25 +32,25 @@ class Token {
 
   /**
    * @brief Gets the type of this token.
-   * @return the token type.
+   * @return The token type.
    */
   auto GetType() const noexcept -> TokenType;
 
   /**
    * @brief Gets the lexeme of this token.
-   * @return the lexeme.
+   * @return The lexeme.
    */
   auto GetLexeme() const noexcept -> std::string;
 
   /**
    * @brief Gets the literal value of this token.
-   * @return the literal value.
+   * @return The literal value.
    */
   auto GetLiteral() const -> Object;
 
   /**
    * @brief Gets the line number of this token.
-   * @return the line number
+   * @return The line number.
    */
   auto GetLineNumber() const noexcept -> uint32_t;
 
@@ -58,15 +58,15 @@ class Token {
    * @brief Returns a string representation of the token. This method converts
    * the token's type, lexeme, and literal value into a human-readable string
    * format.
-   * @return a string representing the token.
+   * @return A string representing the token.
    */
   auto ToString() const -> std::string;
 
   /**
    * @brief Enables printing of a Token object using the `<<` operator.
-   * @param os the output stream to write to.
-   * @param token the token object to be printed.
-   * @return a reference to the output stream.
+   * @param os The output stream to write to.
+   * @param token The token object to be printed.
+   * @return A reference to the output stream.
    */
   friend auto operator<<(std::ostream& os, const Token& token) -> std::ostream&;
 

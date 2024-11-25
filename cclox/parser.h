@@ -64,7 +64,7 @@ class Parser {
    * @brief Parses an expression. This is the entry point for parsing
    * expressions, delegating to `ParseEquality()` for further processing
    * according to operator precedence.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParseExpression() -> ExprPtr;
 
@@ -72,7 +72,7 @@ class Parser {
    * @brief Parses an equality expression. Parses expressions involving equality
    * operators (`==` and `!=`). Repeatedly consumes operators of the same
    * precedence level to form a left-associative chain of binary expressions.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParseEquality() -> ExprPtr;
 
@@ -81,7 +81,7 @@ class Parser {
    * comparison operators (`>`, `>=`, `<`, `<=`). Similar to equality parsing,
    * it chains comparisons into a left-associative binary tree structure based
    * on precedence.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParseComparison() -> ExprPtr;
 
@@ -89,7 +89,7 @@ class Parser {
    * @brief Parses a term expression. Parses addition and subtraction
    * expressions. Terms are the next level down in precedence after comparisons,
    * allowing for binary operations with `+` and `-` operators.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParseTerm() -> ExprPtr;
 
@@ -97,7 +97,7 @@ class Parser {
    * @brief Parses a factor expression. Parses multiplication and division
    * expressions. Factors take precedence over terms, allowing for binary
    * operations with `*` and `/` operators.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParseFactor() -> ExprPtr;
 
@@ -105,7 +105,7 @@ class Parser {
    * @brief Parses a unary expression. Parses unary expressions that begin with
    * a `!` or `-` operator. If a unary operator is present, it recursively
    * parses the next highest-precedence expression as the operand.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParseUnary() -> ExprPtr;
 
@@ -113,7 +113,7 @@ class Parser {
    * @brief Parses a primary expression. Parses literals (such as `true`,
    * `false`, `nil`, numbers, and strings) and expressions enclosed in
    * parentheses. This method represents the lowest level of precedence.
-   * @return a pointer to the parsed expression.
+   * @return A pointer to the parsed expression.
    */
   auto ParsePrimary() -> ExprPtr;
 
@@ -121,8 +121,8 @@ class Parser {
    * @brief Checks to see if the current token has any of the given types. If
    * so, consumes the token and returns true. Otherwise, returns false and
    * leaves the current token alone.
-   * @param type the first token type.
-   * @param types the remaining token types.
+   * @param type The first token type.
+   * @param types The remaining token types.
    * @return true if the token has any of the given types or false otherwise.
    */
   template<typename T, typename... Ts,
@@ -132,22 +132,22 @@ class Parser {
   /**
    * @brief Checks if the current token is of the given type and consumes the
    * token if so. Otherwise, throw an error with the given error message.
-   * @param type the token type to check with.
-   * @param message the error message to use.
-   * @return the currently consumed token.
+   * @param type The token type to check with.
+   * @param message The error message to use.
+   * @return The currently consumed token.
    */
   auto Consume(TokenType type, std::string_view message) -> Token;
 
   /**
    * @brief Checks if the next token to be consumed is of a given type.
-   * @param type the token type to check.
+   * @param type The token type to check.
    * @return true if the token matches the given type or false otherwise.
    */
   auto Check(TokenType type) const noexcept -> bool;
 
   /**
    * @brief Consumes the current token and returns it.
-   * @return the most recently consumed token.
+   * @return The most recently consumed token.
    */
   auto Advance() noexcept -> Token;
 
@@ -159,28 +159,28 @@ class Parser {
 
   /**
    * @brief Returns the next token to be parsed.
-   * @return the next token to be parsed.
+   * @return The next token to be parsed.
    */
   auto Peek() const noexcept -> Token;
 
   /**
    * @brief Returns the most recently consumed token.
-   * @return the most recently consumed token.
+   * @return The most recently consumed token.
    */
   auto Previous() const noexcept -> Token;
 
   /**
    * @brief Reports an error at the given token and returns a ParseError
-   * exception
-   * @param token the token where the error occurs
-   * @param message the error message
-   * @return a ParseError exception
+   * exception.
+   * @param token The token where the error occurs.
+   * @param message The error message.
+   * @return A ParseError exception.
    */
   auto Error(const Token& token, std::string_view message) const noexcept -> ParseError;
 
   /**
    * @brief Discards all the tokens of an erroneous statement and advances to
-   * the token of the next statement
+   * the token of the next statement.
    */
   auto Synchronize() noexcept -> void;
 
