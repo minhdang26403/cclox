@@ -35,7 +35,7 @@ auto Interpreter::operator()(const BinaryPtr& expr) const -> Object {
   switch (op.GetType()) {
     case BANG_EQUAL:
       return !Equal(left, right);
-    case EQUAL:
+    case EQUAL_EQUAL:
       return Equal(left, right);
     case GREATER:
       return Greater(left, op, right);

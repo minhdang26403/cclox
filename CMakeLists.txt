@@ -32,4 +32,6 @@ enable_testing()
 include(GoogleTest)
 
 
+include_directories(cclox)
 add_subdirectory(cclox)
+add_subdirectory(test)

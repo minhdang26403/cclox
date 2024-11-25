@@ -38,6 +38,13 @@ class Interpreter {
   auto Interpret(const ExprPtr& expr) const -> void;
 
   /**
+   * @brief Helper function to evaluate an expression.
+   * @param expr The expression to evaluate.
+   * @return The result of the evaluation.
+   */
+  auto Evaluate(const ExprPtr& expr) const -> Object;
+
+  /**
    * @brief Evaluates a binary expression (e.g., a + b, a > b).
    * @param expr The binary expression to evaluate.
    * @return The result of evaluating the expression.
@@ -66,13 +73,6 @@ class Interpreter {
   auto operator()(const UnaryPtr& expr) const -> Object;
 
  private:
-  /**
-   * @brief Helper function to evaluate an expression.
-   * @param expr The expression to evaluate.
-   * @return The result of the evaluation.
-   */
-  auto Evaluate(const ExprPtr& expr) const -> Object;
-
   /**
    * @brief Tests equality between two Objects.
    * @param left Left operand of the equality comparison.

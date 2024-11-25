@@ -66,7 +66,15 @@ auto Scanner::ScanToken() -> void {
       AddToken(TokenType::DOT);
       break;
     case '-':
-      AddToken(TokenType::MINUS);
+      // We can't always split the minus sign and the following numeric value
+      // since int32_t can't store 2147483648 (INT_MAX + 1), but it can store
+      // -2147483648 (INT_MIN). Hence, we group the minus sign and the numeric
+      // to handle this case.
+      if (IsDigit(Peek())) {
+        ScanNumber();
+      } else {
+        AddToken(TokenType::MINUS);
+      }
       break;
     case '+':
       AddToken(TokenType::PLUS);
@@ -152,7 +160,6 @@ auto Scanner::ScanNumber() -> void {
   }
 
   std::string num_str = source_.substr(start_, current_ - start_);
-  Object value;
 
   if (num_str.find('.') != std::string::npos ||
       num_str.find('e') != std::string::npos) {
