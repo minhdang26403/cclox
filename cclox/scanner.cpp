@@ -151,8 +151,17 @@ auto Scanner::ScanNumber() -> void {
     }
   }
 
-  Object value{std::stod(source_.substr(start_, current_ - start_))};
-  AddToken(TokenType::NUMBER, value);
+  std::string num_str = source_.substr(start_, current_ - start_);
+  Object value;
+
+  if (num_str.find('.') != std::string::npos ||
+      num_str.find('e') != std::string::npos) {
+    Object value{std::stod(num_str)};
+    AddToken(TokenType::NUMBER, value);
+  } else {
+    Object value{std::stoi(num_str)};
+    AddToken(TokenType::NUMBER, value);
+  }
 }
 
 auto Scanner::ScanString() -> void {

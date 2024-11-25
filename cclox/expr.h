@@ -12,7 +12,7 @@ class Grouping;
 class Literal;
 class Unary;
 
-// Must use pointers to avoid cyclic dependencies between these objects and Expr
+// Use pointers to remove cyclic dependencies between these objects and `Expr`
 // object
 using BinaryPtr = std::unique_ptr<Binary>;
 using GroupingPtr = std::unique_ptr<Grouping>;
@@ -118,16 +118,6 @@ class Unary {
   Token op_;
   ExprPtr right_;
 };
-
-// TODO(Dang): may not need this
-template<typename T>
-struct ExprVisitor {
-  auto operator()(const BinaryPtr& expr) -> T;
-  auto operator()(const GroupingPtr& expr) -> T;
-  auto operator()(const LiteralPtr& expr) -> T;
-  auto operator()(const UnaryPtr& expr) -> T;
-};
-
 }  // namespace cclox
 
 #endif

@@ -7,13 +7,14 @@
 #include <sstream>
 
 #include "ast_printer.h"
+#include "interpreter.h"
 #include "parser.h"
 #include "scanner.h"
 #include "token_type.h"
 
 namespace cclox {
-
-bool cclox::Lox::had_error = false;
+bool Lox::had_error = false;
+bool Lox::had_runtime_error = false;
 
 auto Lox::RunFile(std::string_view path) -> void {
   std::ifstream file{path};
@@ -24,6 +25,9 @@ auto Lox::RunFile(std::string_view path) -> void {
   // Indicate an error in the exit code.
   if (had_error) {
     std::exit(EX_DATAERR);
+  }
+  if (had_runtime_error) {
+    std::exit(EX_SOFTWARE);
   }
 }
 
@@ -54,6 +58,12 @@ auto Lox::Error(const Token& token, std::string_view message) -> void {
   }
 }
 
+auto Lox::ReportRuntimeError(const RuntimeError& error) -> void {
+  std::cout << std::format("{}\n[line {}]\n", error.what(),
+                           error.token_.GetLineNumber());
+  had_runtime_error = true;
+}
+
 // =========================Private Methods=========================
 
 auto Lox::Run(std::string source) -> void {
@@ -64,11 +74,6 @@ auto Lox::Run(std::string source) -> void {
     return;
   }
 
-  // TODO(Dang): Maybe remove debug code
-  for (const auto& token : tokens) {
-    std::cout << TokenTypeToString(token.GetType()) << '\n';
-  }
-
   Parser parser{std::move(tokens)};
   ExprPtr expression = parser.Parse();
   // Stop if there was a parsing error.
@@ -76,7 +81,7 @@ auto Lox::Run(std::string source) -> void {
     return;
   }
 
-  std::cout << ASTPrinter::ToStringExpr(expression) << '\n';
+  interpreter_.Interpret(expression);
 }
 
 auto Lox::Report(uint32_t line_number, std::string_view where,

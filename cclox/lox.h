@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "interpreter.h"
 #include "token.h"
 
 namespace cclox {
@@ -37,6 +38,15 @@ class Lox {
    */
   static auto Error(const Token& token, std::string_view message) -> void;
 
+  /**
+   * Reports a runtime error to standard output and sets the error flag.
+   * Prints the error message followed by the line number where the error
+   * occurred.
+   * @param error The runtime error containing the error message and token
+   * information
+   */
+  static auto ReportRuntimeError(const RuntimeError& error) -> void;
+
  private:
   /**
    * @brief Executes the given Lox source code.
@@ -54,8 +64,10 @@ class Lox {
   static auto Report(uint32_t line_number, std::string_view where,
                      std::string_view message) -> void;
 
+  Interpreter interpreter_;
   // A flag indicating whether an error has occurred.
   static bool had_error;
+  static bool had_runtime_error;
 };
 }  // namespace cclox
 
