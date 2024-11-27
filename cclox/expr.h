@@ -7,29 +7,30 @@
 
 namespace cclox {
 // Forward declaration.
-class Binary;
-class Grouping;
-class Literal;
-class Unary;
+class BinaryExpr;
+class GroupingExpr;
+class LiteralExpr;
+class UnaryExpr;
 
 // Use pointers to remove cyclic dependencies between these objects and `Expr`
 // object
-using BinaryPtr = std::unique_ptr<Binary>;
-using GroupingPtr = std::unique_ptr<Grouping>;
-using LiteralPtr = std::unique_ptr<Literal>;
-using UnaryPtr = std::unique_ptr<Unary>;
+using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
+using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
+using LiteralExprPtr = std::unique_ptr<LiteralExpr>;
+using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
 
-using ExprPtr = std::variant<BinaryPtr, GroupingPtr, LiteralPtr, UnaryPtr>;
+using ExprPtr =
+    std::variant<BinaryExprPtr, GroupingExprPtr, LiteralExprPtr, UnaryExprPtr>;
 
-class Binary {
+class BinaryExpr {
  public:
   /**
-   * @brief Constructs a Binary expression.
+   * @brief Constructs a BinaryExpr expression.
    * @param left The left operand expression.
    * @param op The binary operator token.
    * @param right The right operand expression.
    */
-  Binary(ExprPtr left, Token op, ExprPtr right)
+  BinaryExpr(ExprPtr left, Token op, ExprPtr right)
       : left_(std::move(left)), op_(std::move(op)), right_(std::move(right)) {}
 
   /**
@@ -56,13 +57,13 @@ class Binary {
   ExprPtr right_;
 };
 
-class Grouping {
+class GroupingExpr {
  public:
   /**
-   * @brief Constructs a Grouping expression.
+   * @brief Constructs a GroupingExpr expression.
    * @param expression The inner expression being grouped.
    */
-  Grouping(ExprPtr expression) : expression_(std::move(expression)) {}
+  GroupingExpr(ExprPtr expression) : expression_(std::move(expression)) {}
 
   /**
    * @brief Gets the expression being grouped.
@@ -74,13 +75,13 @@ class Grouping {
   ExprPtr expression_;
 };
 
-class Literal {
+class LiteralExpr {
  public:
   /**
-   * @brief Constructs a Literal expression.
+   * @brief Constructs a LiteralExpr expression.
    * @param value The value of the literal, stored as an Object.
    */
-  Literal(Object value) : value_(std::move(value)) {}
+  LiteralExpr(Object value) : value_(std::move(value)) {}
 
   /**
    * @brief Gets the value of a literal.
@@ -92,14 +93,14 @@ class Literal {
   Object value_;
 };
 
-class Unary {
+class UnaryExpr {
  public:
   /**
-   * @brief Constructs a Unary expression.
+   * @brief Constructs a UnaryExpr expression.
    * @param op The unary operator token.
    * @param right The operand expression.
    */
-  Unary(Token op, ExprPtr right)
+  UnaryExpr(Token op, ExprPtr right)
       : op_(std::move(op)), right_(std::move(right)) {}
 
   /**

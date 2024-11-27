@@ -9,15 +9,18 @@
 
 /**
  * Grammar:
- *    expression  -> equality;
- *    equality    -> comparison ( ( "!=" | "==" ) comparison )* ;
- *    comparison  -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
- *    term        -> factor ( ( "-" | "+" ) factor )* ;
- *    factor      -> unary ( ( "/" | "*" ) unary )* ;
- *    unary       -> ( "!" | "-" ) unary
- *                | primary ;
- *    primary     -> NUMBER | STRING | "true" | "false" | "nil"
- *                | "(" expression ")" ;
+ *    program       -> statement* EOF ;
+ *    statement     -> exprStmt | printStmt ;
+ *    exprStmt      -> expression ";" ;
+ *    printStmt     -> "print" expression ";" ;
+ *    expression    -> equality;
+ *    equality      -> comparison ( ( "!=" | "==" ) comparison )* ;
+ *    comparison    -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+ *    term          -> factor ( ( "-" | "+" ) factor )* ;
+ *    factor        -> unary ( ( "/" | "*" ) unary )* ;
+ *    unary         -> ( "!" | "-" ) unary | primary ;
+ *    primary       -> NUMBER | STRING | "true" | "false" | "nil"
+ *                    | "(" expression ")" ;
  */
 
 namespace cclox {
@@ -41,8 +44,8 @@ auto Parser::ParseEquality() -> ExprPtr {
   while (Match(BANG_EQUAL, EQUAL_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseComparison();
-    expr = ExprPtr{std::make_unique<Binary>(std::move(expr), std::move(op),
-                                            std::move(right))};
+    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                                std::move(right))};
   }
 
   return expr;
@@ -55,8 +58,8 @@ auto Parser::ParseComparison() -> ExprPtr {
   while (Match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseTerm();
-    expr = ExprPtr{std::make_unique<Binary>(std::move(expr), std::move(op),
-                                            std::move(right))};
+    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                                std::move(right))};
   }
 
   return expr;
@@ -69,8 +72,8 @@ auto Parser::ParseTerm() -> ExprPtr {
   while (Match(MINUS, PLUS)) {
     Token op = Previous();
     ExprPtr right = ParseFactor();
-    expr = ExprPtr{std::make_unique<Binary>(std::move(expr), std::move(op),
-                                            std::move(right))};
+    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                                std::move(right))};
   }
 
   return expr;
@@ -83,8 +86,8 @@ auto Parser::ParseFactor() -> ExprPtr {
   while (Match(SLASH, STAR)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    expr = ExprPtr{std::make_unique<Binary>(std::move(expr), std::move(op),
-                                            std::move(right))};
+    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                                std::move(right))};
   }
 
   return expr;
@@ -95,7 +98,8 @@ auto Parser::ParseUnary() -> ExprPtr {
   if (Match(BANG, MINUS)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    return ExprPtr{std::make_unique<Unary>(std::move(op), std::move(right))};
+    return ExprPtr{
+        std::make_unique<UnaryExpr>(std::move(op), std::move(right))};
   }
 
   return ParsePrimary();
@@ -104,25 +108,25 @@ auto Parser::ParseUnary() -> ExprPtr {
 auto Parser::ParsePrimary() -> ExprPtr {
   using enum TokenType;
   if (Match(FALSE)) {
-    return ExprPtr{std::make_unique<Literal>(false)};
+    return ExprPtr{std::make_unique<LiteralExpr>(false)};
   }
 
   if (Match(TRUE)) {
-    return ExprPtr{std::make_unique<Literal>(true)};
+    return ExprPtr{std::make_unique<LiteralExpr>(true)};
   }
 
   if (Match(NIL)) {
-    return ExprPtr{std::make_unique<Literal>(nullptr)};
+    return ExprPtr{std::make_unique<LiteralExpr>(nullptr)};
   }
 
   if (Match(NUMBER, STRING)) {
-    return ExprPtr{std::make_unique<Literal>(Previous().GetLiteral())};
+    return ExprPtr{std::make_unique<LiteralExpr>(Previous().GetLiteral())};
   }
 
   if (Match(LEFT_PAREN)) {
     ExprPtr expr = ParseExpression();
     Consume(RIGHT_PAREN, "Expect ')' after expression.");
-    return ExprPtr{std::make_unique<Grouping>(std::move(expr))};
+    return ExprPtr{std::make_unique<GroupingExpr>(std::move(expr))};
   }
 
   throw Error(Peek(), "Expect expression.");

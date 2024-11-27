@@ -25,7 +25,7 @@ auto Interpreter::Evaluate(const ExprPtr& expr) const -> Object {
   return std::visit(*this, expr);
 }
 
-auto Interpreter::operator()(const BinaryPtr& expr) const -> Object {
+auto Interpreter::operator()(const BinaryExprPtr& expr) const -> Object {
   Object left = Evaluate(expr->GetLeftExpr());
   Object right = Evaluate(expr->GetRightExpr());
 
@@ -61,15 +61,15 @@ auto Interpreter::operator()(const BinaryPtr& expr) const -> Object {
   assert(false);
 }
 
-auto Interpreter::operator()(const GroupingPtr& expr) const -> Object {
+auto Interpreter::operator()(const GroupingExprPtr& expr) const -> Object {
   return Evaluate(expr->GetExpr());
 }
 
-auto Interpreter::operator()(const LiteralPtr& expr) const -> Object {
+auto Interpreter::operator()(const LiteralExprPtr& expr) const -> Object {
   return expr->GetValue();
 }
 
-auto Interpreter::operator()(const UnaryPtr& expr) const -> Object {
+auto Interpreter::operator()(const UnaryExprPtr& expr) const -> Object {
   Object right = Evaluate(expr->GetRightExpression());
 
   using enum TokenType;
@@ -159,7 +159,7 @@ auto Interpreter::Divide(const Object& left, const Token& op,
     return Object{static_cast<int32_t>(left_num) /
                   static_cast<int32_t>(right_num)};
   }
-  
+
   auto obj = Object{left_num / right_num};
   return obj;
 }

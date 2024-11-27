@@ -15,10 +15,10 @@ namespace cclox {
  * Lisp-like prefix notation.
  *
  * Example output formats:
- * - Binary: "(+ 1 2)".
- * - Grouping: "(group 1)".
- * - Unary: "(- 1)".
- * - Literal: "123" or "hello".
+ * - BinaryExpr: "(+ 1 2)".
+ * - GroupingExpr: "(group 1)".
+ * - UnaryExpr: "(- 1)".
+ * - LiteralExpr: "123" or "hello".
  */
 class ASTPrinter {
  public:
@@ -37,7 +37,7 @@ class ASTPrinter {
    * @return String representation in the format "(operator left_expr
    * right_expr)".
    */
-  auto operator()(const BinaryPtr& expr) const -> std::string {
+  auto operator()(const BinaryExprPtr& expr) const -> std::string {
     return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpr(),
                         expr->GetRightExpr());
   }
@@ -47,7 +47,7 @@ class ASTPrinter {
    * @param expr Shared pointer to the grouping expression.
    * @return String representation in the format "(group expr)".
    */
-  auto operator()(const GroupingPtr& expr) const -> std::string {
+  auto operator()(const GroupingExprPtr& expr) const -> std::string {
     return Parenthesize("group", expr->GetExpr());
   }
 
@@ -56,7 +56,7 @@ class ASTPrinter {
    * @param expr Shared pointer to the literal expression.
    * @return String representation of the literal value.
    */
-  auto operator()(const LiteralPtr& expr) const -> std::string {
+  auto operator()(const LiteralExprPtr& expr) const -> std::string {
     return expr->GetValue().ToString();
   }
 
@@ -65,7 +65,7 @@ class ASTPrinter {
    * @param expr Shared pointer to the unary expression.
    * @return String representation in the format "(operator expr)".
    */
-  auto operator()(const UnaryPtr& expr) const -> std::string {
+  auto operator()(const UnaryExprPtr& expr) const -> std::string {
     return Parenthesize(expr->GetOperator().GetLexeme(),
                         expr->GetRightExpression());
   }

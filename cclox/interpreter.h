@@ -49,28 +49,28 @@ class Interpreter {
    * @param expr The binary expression to evaluate.
    * @return The result of evaluating the expression.
    */
-  auto operator()(const BinaryPtr& expr) const -> Object;
+  auto operator()(const BinaryExprPtr& expr) const -> Object;
 
   /**
    * @brief Evaluates a grouping expression (expressions in parentheses).
    * @param expr The grouping expression to evaluate.
    * @return The result of evaluating the contained expression.
    */
-  auto operator()(const GroupingPtr& expr) const -> Object;
+  auto operator()(const GroupingExprPtr& expr) const -> Object;
 
   /**
    * @brief Evaluates a literal value (numbers, strings, booleans, null).
    * @param expr The literal expression to evaluate.
    * @return The literal value wrapped in an Object.
    */
-  auto operator()(const LiteralPtr& expr) const -> Object;
+  auto operator()(const LiteralExprPtr& expr) const -> Object;
 
   /**
    * @brief Evaluates a unary expression (e.g., -a, !b).
    * @param expr The unary expression to evaluate.
    * @return The result of applying the unary operator.
    */
-  auto operator()(const UnaryPtr& expr) const -> Object;
+  auto operator()(const UnaryExprPtr& expr) const -> Object;
 
  private:
   /**
