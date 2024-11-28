@@ -7,20 +7,38 @@
 
 namespace cclox {
 // Forward declaration.
+class AssignExpr;
 class BinaryExpr;
 class GroupingExpr;
 class LiteralExpr;
 class UnaryExpr;
+class VariableExpr;
 
 // Use pointers to remove cyclic dependencies between these objects and `Expr`
 // object
+using AssignExprPtr = std::unique_ptr<AssignExpr>;
 using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
 using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
 using LiteralExprPtr = std::unique_ptr<LiteralExpr>;
 using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
+using VariableExprPtr = std::unique_ptr<VariableExpr>;
 
-using ExprPtr =
-    std::variant<BinaryExprPtr, GroupingExprPtr, LiteralExprPtr, UnaryExprPtr>;
+using ExprPtr = std::variant<AssignExprPtr, BinaryExprPtr, GroupingExprPtr,
+                             LiteralExprPtr, UnaryExprPtr, VariableExprPtr>;
+
+class AssignExpr {
+ public:
+  AssignExpr(Token variable, ExprPtr value)
+      : variable_(std::move(variable)), value_(std::move(value)) {}
+
+  auto GetVariable() const noexcept -> const Token& { return variable_; }
+
+  auto GetValue() const noexcept -> const ExprPtr& { return value_; }
+
+ private:
+  Token variable_;
+  ExprPtr value_;
+};
 
 class BinaryExpr {
  public:
@@ -63,7 +81,8 @@ class GroupingExpr {
    * @brief Constructs a GroupingExpr expression.
    * @param expression The inner expression being grouped.
    */
-  GroupingExpr(ExprPtr expression) : expression_(std::move(expression)) {}
+  explicit GroupingExpr(ExprPtr expression)
+      : expression_(std::move(expression)) {}
 
   /**
    * @brief Gets the expression being grouped.
@@ -81,7 +100,7 @@ class LiteralExpr {
    * @brief Constructs a LiteralExpr expression.
    * @param value The value of the literal, stored as an Object.
    */
-  LiteralExpr(Object value) : value_(std::move(value)) {}
+  explicit LiteralExpr(Object value) : value_(std::move(value)) {}
 
   /**
    * @brief Gets the value of a literal.
@@ -119,6 +138,17 @@ class UnaryExpr {
   Token op_;
   ExprPtr right_;
 };
+
+class VariableExpr {
+ public:
+  explicit VariableExpr(Token variable) : variable_(std::move(variable)) {}
+
+  auto GetVariable() const noexcept -> const Token& { return variable_; }
+
+ private:
+  Token variable_;
+};
+
 }  // namespace cclox
 
 #endif

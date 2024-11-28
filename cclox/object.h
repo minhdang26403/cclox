@@ -32,7 +32,9 @@ class Object {
    * Object.
    * @param other The Object to copy from.
    */
-  Object(const Object& other) : value_(other.value_) {}
+  Object(const Object& other) = default;
+
+  Object(Object&& other) = default;
 
   /**
    * @brief Templated constructor for initializing an Object with a compatible
@@ -42,6 +44,10 @@ class Object {
   template<typename T>
     requires std::is_convertible_v<T, ValueType>
   Object(T&& value) : value_(std::forward<T>(value)) {}
+
+  auto operator=(const Object& other) -> Object& = default;
+
+  auto operator=(Object&& other) -> Object& = default;
 
   /**
    * @brief Checks if the Object holds a boolean value.

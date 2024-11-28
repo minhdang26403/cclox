@@ -1,40 +1,131 @@
 #include "parser.h"
 
 #include <initializer_list>
+#include <variant>
 
 #include "expr.h"
 #include "lox.h"
+#include "stmt.h"
 #include "token.h"
 #include "token_type.h"
 
 /**
  * Grammar:
- *    program       -> statement* EOF ;
- *    statement     -> exprStmt | printStmt ;
+ *    program       -> declaration* EOF ;
+ *    declaration   -> varDecl | statement ;
+ *    varDecl       -> "var" IDENTIFIER ( "=" expression )? ";" ;
+ *    statement     -> exprStmt | printStmt | block ;
+ *    block         -> "{" declaration "}" ;
  *    exprStmt      -> expression ";" ;
  *    printStmt     -> "print" expression ";" ;
- *    expression    -> equality;
+ *    expression    -> assignment ;
+ *    assignment    -> IDENTIFIER "=" assignment | equality ;
  *    equality      -> comparison ( ( "!=" | "==" ) comparison )* ;
  *    comparison    -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  *    term          -> factor ( ( "-" | "+" ) factor )* ;
  *    factor        -> unary ( ( "/" | "*" ) unary )* ;
  *    unary         -> ( "!" | "-" ) unary | primary ;
- *    primary       -> NUMBER | STRING | "true" | "false" | "nil"
- *                    | "(" expression ")" ;
+ *    primary       -> "true" | "false" | "nil"
+ *                   | NUMBER | STRING
+ *                   | "(" expression ")"
+ *                   | IDENTIFIER ;
  */
 
 namespace cclox {
+auto Parser::Parse() -> std::vector<StmtPtr> {
+  std::vector<StmtPtr> statements;
 
-auto Parser::Parse() -> ExprPtr {
+  while (!IsAtEnd()) {
+    statements.emplace_back(ParseDeclaration());
+  }
+
+  return statements;
+}
+
+auto Parser::ParseDeclaration() -> StmtPtr {
   try {
-    return ParseExpression();
+    if (Match(TokenType::VAR)) {
+      return ParseVarDeclaration();
+    }
+
+    return ParseStatement();
   } catch (const ParseError& error) {
-    return {};
+    Synchronize();
+    return StmtPtr{};
   }
 }
 
+auto Parser::ParseVarDeclaration() -> StmtPtr {
+  using enum TokenType;
+  Token name = Consume(IDENTIFIER, "Expect variable name.");
+
+  std::optional<ExprPtr> initializer;
+  if (Match(EQUAL)) {
+    initializer = ParseExpression();
+  }
+
+  Consume(SEMICOLON, "Expect ';' after variable declaration.");
+  return StmtPtr{
+      std::make_unique<VarStmt>(std::move(name), std::move(initializer))};
+}
+
+auto Parser::ParseStatement() -> StmtPtr {
+  if (Match(TokenType::PRINT)) {
+    return ParsePrintStatement();
+  }
+  if (Match(TokenType::LEFT_BRACE)) {
+    return StmtPtr{std::make_unique<BlockStmt>(ParseBlockStatement())};
+  }
+
+  return ParseExpressionStatement();
+}
+
+auto Parser::ParsePrintStatement() -> StmtPtr {
+  ExprPtr value = ParseExpression();
+  Consume(TokenType::SEMICOLON, "Expect ';' after value.");
+
+  return StmtPtr{std::make_unique<PrintStmt>(std::move(value))};
+}
+
+auto Parser::ParseExpressionStatement() -> StmtPtr {
+  ExprPtr expr = ParseExpression();
+  Consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+
+  return StmtPtr{std::make_unique<ExprStmt>(std::move(expr))};
+}
+
+auto Parser::ParseBlockStatement() -> std::vector<StmtPtr> {
+  std::vector<StmtPtr> statements;
+
+  while (!Check(TokenType::RIGHT_BRACE) && !IsAtEnd()) {
+    statements.emplace_back(ParseDeclaration());
+  }
+
+  Consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+  return statements;
+}
+
 auto Parser::ParseExpression() -> ExprPtr {
-  return ParseEquality();
+  return ParseAssignment();
+}
+
+auto Parser::ParseAssignment() -> ExprPtr {
+  ExprPtr expr = ParseEquality();
+
+  if (Match(TokenType::EQUAL)) {
+    Token equals = Previous();
+    ExprPtr value = ParseAssignment();
+    const auto* variable_expr_ptr = std::get_if<VariableExprPtr>(&expr);
+
+    if (variable_expr_ptr) {
+      const Token& variable = (*variable_expr_ptr)->GetVariable();
+      return ExprPtr{std::make_unique<AssignExpr>(variable, std::move(value))};
+    }
+
+    throw Error(equals, "Invalid assignment target.");
+  }
+
+  return expr;
 }
 
 auto Parser::ParseEquality() -> ExprPtr {
@@ -123,6 +214,10 @@ auto Parser::ParsePrimary() -> ExprPtr {
     return ExprPtr{std::make_unique<LiteralExpr>(Previous().GetLiteral())};
   }
 
+  if (Match(IDENTIFIER)) {
+    return std::make_unique<VariableExpr>(Previous());
+  }
+
   if (Match(LEFT_PAREN)) {
     ExprPtr expr = ParseExpression();
     Consume(RIGHT_PAREN, "Expect ')' after expression.");
@@ -178,7 +273,7 @@ auto Parser::Previous() const noexcept -> Token {
   return tokens_[current_ - 1];
 }
 
-auto Parser::Error(const Token& token, std::string_view message) const noexcept
+auto Parser::Error(const Token& token, std::string_view message) const
     -> ParseError {
   Lox::Error(token, message);
   return ParseError{message};

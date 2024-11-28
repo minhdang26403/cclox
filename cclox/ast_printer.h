@@ -31,6 +31,11 @@ class ASTPrinter {
     return std::visit(*this, expr);
   }
 
+  auto operator()(const AssignExprPtr& expr) const -> std::string {
+    return Parenthesize("= " + expr->GetVariable().GetLexeme(),
+                        expr->GetValue());
+  }
+
   /**
    * @brief Formats a binary expression node.
    * @param expr Shared pointer to the binary expression.
@@ -68,6 +73,10 @@ class ASTPrinter {
   auto operator()(const UnaryExprPtr& expr) const -> std::string {
     return Parenthesize(expr->GetOperator().GetLexeme(),
                         expr->GetRightExpression());
+  }
+
+  auto operator()(const VariableExprPtr& expr) const -> std::string {
+    return expr->GetVariable().GetLexeme();
   }
 
  private:

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "expr.h"
+#include "stmt.h"
 #include "token.h"
 #include "token_type.h"
 
@@ -57,9 +58,21 @@ class Parser {
    */
   explicit Parser(std::vector<Token> tokens) : tokens_(std::move(tokens)) {}
 
-  auto Parse() -> ExprPtr;
+  auto Parse() -> std::vector<StmtPtr>;
 
  private:
+  auto ParseDeclaration() -> StmtPtr;
+
+  auto ParseVarDeclaration() -> StmtPtr;
+
+  auto ParseStatement() -> StmtPtr;
+
+  auto ParsePrintStatement() -> StmtPtr;
+
+  auto ParseExpressionStatement() -> StmtPtr;
+
+  auto ParseBlockStatement() -> std::vector<StmtPtr>;
+
   /**
    * @brief Parses an expression. This is the entry point for parsing
    * expressions, delegating to `ParseEquality()` for further processing
@@ -67,6 +80,8 @@ class Parser {
    * @return A pointer to the parsed expression.
    */
   auto ParseExpression() -> ExprPtr;
+
+  auto ParseAssignment() -> ExprPtr;
 
   /**
    * @brief Parses an equality expression. Parses expressions involving equality
@@ -176,7 +191,7 @@ class Parser {
    * @param message The error message.
    * @return A ParseError exception.
    */
-  auto Error(const Token& token, std::string_view message) const noexcept -> ParseError;
+  auto Error(const Token& token, std::string_view message) const -> ParseError;
 
   /**
    * @brief Discards all the tokens of an erroneous statement and advances to

@@ -2,10 +2,13 @@
 #define INTERPRETER_H_
 
 #include <format>
+#include <memory>
 #include <stdexcept>
 
+#include "environment.h"
 #include "expr.h"
 #include "object.h"
+#include "stmt.h"
 
 namespace cclox {
 /**
@@ -31,46 +34,77 @@ class RuntimeError : public std::runtime_error {
  */
 class Interpreter {
  public:
+  Interpreter() : environment_(std::make_shared<Environment>()) {}
+
   /**
    * @brief Evaluates an expression and prints its result.
    * @param expr The expression to interpret.
    */
-  auto Interpret(const ExprPtr& expr) const -> void;
+  auto Interpret(const std::vector<StmtPtr>& statements) -> void;
 
+  //====================Methods to handle statement====================
+  auto ExecuteStatement(const StmtPtr& stmt) -> void;
+
+  auto operator()(const BlockStmtPtr& stmt) -> void;
+
+  auto operator()(const ClassStmtPtr& stmt) -> void;
+
+  auto operator()(const ExprStmtPtr& stmt) -> void;
+
+  auto operator()(const FunctionStmtPtr& stmt) -> void;
+
+  auto operator()(const IfStmtPtr& stmt) -> void;
+
+  auto operator()(const PrintStmtPtr& stmt) -> void;
+
+  auto operator()(const ReturnStmtPtr& stmt) -> void;
+
+  auto operator()(const VarStmtPtr& stmt) -> void;
+
+  auto operator()(const WhileStmtPtr& stmt) -> void;
+
+  auto ExecuteBlockStatement(const std::vector<StmtPtr>& statements,
+                             std::shared_ptr<Environment> environment) -> void;
+
+  //====================Methods to handle expressions====================
   /**
    * @brief Helper function to evaluate an expression.
    * @param expr The expression to evaluate.
    * @return The result of the evaluation.
    */
-  auto Evaluate(const ExprPtr& expr) const -> Object;
+  auto EvaluateExpression(const ExprPtr& expr) -> Object;
+
+  auto operator()(const AssignExprPtr& expr) -> Object;
 
   /**
    * @brief Evaluates a binary expression (e.g., a + b, a > b).
    * @param expr The binary expression to evaluate.
    * @return The result of evaluating the expression.
    */
-  auto operator()(const BinaryExprPtr& expr) const -> Object;
+  auto operator()(const BinaryExprPtr& expr) -> Object;
 
   /**
    * @brief Evaluates a grouping expression (expressions in parentheses).
    * @param expr The grouping expression to evaluate.
    * @return The result of evaluating the contained expression.
    */
-  auto operator()(const GroupingExprPtr& expr) const -> Object;
+  auto operator()(const GroupingExprPtr& expr) -> Object;
 
   /**
    * @brief Evaluates a literal value (numbers, strings, booleans, null).
    * @param expr The literal expression to evaluate.
    * @return The literal value wrapped in an Object.
    */
-  auto operator()(const LiteralExprPtr& expr) const -> Object;
+  auto operator()(const LiteralExprPtr& expr) -> Object;
 
   /**
    * @brief Evaluates a unary expression (e.g., -a, !b).
    * @param expr The unary expression to evaluate.
    * @return The result of applying the unary operator.
    */
-  auto operator()(const UnaryExprPtr& expr) const -> Object;
+  auto operator()(const UnaryExprPtr& expr) -> Object;
+
+  auto operator()(const VariableExprPtr& expr) -> Object;
 
  private:
   /**
@@ -151,6 +185,9 @@ class Interpreter {
   auto GetNumberOperands(const Object& left, const Token& op,
                          const Object& right) const
       -> std::pair<double, double>;
+
+  // The environment that stores variables' values.
+  std::shared_ptr<Environment> environment_;
 };
 }  // namespace cclox
 

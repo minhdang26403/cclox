@@ -10,6 +10,7 @@
 #include "interpreter.h"
 #include "parser.h"
 #include "scanner.h"
+#include "stmt.h"
 #include "token_type.h"
 
 namespace cclox {
@@ -69,19 +70,19 @@ auto Lox::ReportRuntimeError(const RuntimeError& error) -> void {
 auto Lox::Run(std::string source) -> void {
   Scanner scanner{std::move(source)};
   std::vector<Token> tokens = scanner.ScanTokens();
-  // Stop if there was a lexing error
+  // Stop if there was a lexing error.
   if (had_error) {
     return;
   }
 
   Parser parser{std::move(tokens)};
-  ExprPtr expression = parser.Parse();
+  std::vector<StmtPtr> statements = parser.Parse();
   // Stop if there was a parsing error.
   if (had_error) {
     return;
   }
 
-  interpreter_.Interpret(expression);
+  interpreter_.Interpret(statements);
 }
 
 auto Lox::Report(uint32_t line_number, std::string_view where,

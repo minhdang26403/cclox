@@ -5,29 +5,111 @@
 #include <stdexcept>
 #include <variant>
 
+#include "environment.h"
 #include "expr.h"
 #include "lox.h"
 #include "object.h"
+#include "stmt.h"
 #include "token.h"
 #include "token_type.h"
 
 namespace cclox {
-auto Interpreter::Interpret(const ExprPtr& expr) const -> void {
+auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
   try {
-    Object value = Evaluate(expr);
-    std::cout << value.ToString() << '\n';
+    for (const auto& statement : statements) {
+      ExecuteStatement(statement);
+    }
   } catch (const RuntimeError& error) {
     Lox::ReportRuntimeError(error);
   }
 }
 
-auto Interpreter::Evaluate(const ExprPtr& expr) const -> Object {
+//====================Methods to handle statement====================
+auto Interpreter::ExecuteStatement(const StmtPtr& stmt) -> void {
+  std::visit(*this, stmt);
+}
+
+auto Interpreter::operator()(const BlockStmtPtr& stmt) -> void {
+  assert(stmt);
+  // Create a new inner env for this block.
+  // The inner env will has the current env as its enclosing env.
+  auto inner_env = std::make_shared<Environment>(environment_);
+  ExecuteBlockStatement(stmt->GetStatements(), std::move(inner_env));
+}
+
+auto Interpreter::operator()(const ClassStmtPtr& stmt [[maybe_unused]])
+    -> void {}
+
+auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
+  assert(stmt);
+  EvaluateExpression(stmt->GetExpression());
+}
+
+auto Interpreter::operator()(const FunctionStmtPtr& stmt [[maybe_unused]])
+    -> void {}
+
+auto Interpreter::operator()(const IfStmtPtr& stmt [[maybe_unused]]) -> void {}
+
+auto Interpreter::operator()(const PrintStmtPtr& stmt) -> void {
+  assert(stmt);
+  Object value = EvaluateExpression(stmt->GetExpression());
+  std::cout << value.ToString() << '\n';
+}
+
+auto Interpreter::operator()(const ReturnStmtPtr& stmt [[maybe_unused]])
+    -> void {}
+
+auto Interpreter::operator()(const VarStmtPtr& stmt) -> void {
+  assert(stmt);
+  Object value{nullptr};
+  const std::optional<ExprPtr>& initializer_opt = stmt->GetInitializer();
+  if (initializer_opt) {
+    value = EvaluateExpression(initializer_opt.value());
+  }
+
+  environment_->Define(stmt->GetVariable().GetLexeme(), value);
+}
+
+auto Interpreter::operator()(const WhileStmtPtr& stmt [[maybe_unused]])
+    -> void {}
+
+auto Interpreter::ExecuteBlockStatement(
+    const std::vector<StmtPtr>& statements,
+    std::shared_ptr<Environment> environment) -> void {
+  std::shared_ptr<Environment> previous = std::move(environment_);
+  try {
+    environment_ = std::move(environment);
+
+    for (const auto& statement : statements) {
+      ExecuteStatement(statement);
+    }
+  } catch (const RuntimeError& error) {
+    environment_ = std::move(previous);
+    // Rethrow the exception.
+    throw;
+  }
+  
+  // Restore the current environment if no exception is thrown.
+  environment_ = std::move(previous);
+}
+
+//====================Methods to handle expressions====================
+auto Interpreter::EvaluateExpression(const ExprPtr& expr) -> Object {
   return std::visit(*this, expr);
 }
 
-auto Interpreter::operator()(const BinaryExprPtr& expr) const -> Object {
-  Object left = Evaluate(expr->GetLeftExpr());
-  Object right = Evaluate(expr->GetRightExpr());
+auto Interpreter::operator()(const AssignExprPtr& expr) -> Object {
+  assert(expr);
+  Object value = EvaluateExpression(expr->GetValue());
+  environment_->Assign(expr->GetVariable(), value);
+
+  return value;
+}
+
+auto Interpreter::operator()(const BinaryExprPtr& expr) -> Object {
+  assert(expr);
+  Object left = EvaluateExpression(expr->GetLeftExpr());
+  Object right = EvaluateExpression(expr->GetRightExpr());
 
   using enum TokenType;
   const Token& op = expr->GetOperator();
@@ -61,16 +143,19 @@ auto Interpreter::operator()(const BinaryExprPtr& expr) const -> Object {
   assert(false);
 }
 
-auto Interpreter::operator()(const GroupingExprPtr& expr) const -> Object {
-  return Evaluate(expr->GetExpr());
+auto Interpreter::operator()(const GroupingExprPtr& expr) -> Object {
+  assert(expr);
+  return EvaluateExpression(expr->GetExpr());
 }
 
-auto Interpreter::operator()(const LiteralExprPtr& expr) const -> Object {
+auto Interpreter::operator()(const LiteralExprPtr& expr) -> Object {
+  assert(expr);
   return expr->GetValue();
 }
 
-auto Interpreter::operator()(const UnaryExprPtr& expr) const -> Object {
-  Object right = Evaluate(expr->GetRightExpression());
+auto Interpreter::operator()(const UnaryExprPtr& expr) -> Object {
+  assert(expr);
+  Object right = EvaluateExpression(expr->GetRightExpression());
 
   using enum TokenType;
   const Token& op = expr->GetOperator();
@@ -87,6 +172,13 @@ auto Interpreter::operator()(const UnaryExprPtr& expr) const -> Object {
   // Unreachable
   assert(false);
 }
+
+auto Interpreter::operator()(const VariableExprPtr& expr) -> Object {
+  assert(expr);
+  return environment_->Get(expr->GetVariable());
+}
+
+// ====================Private method implementations====================
 
 auto Interpreter::Equal(const Object& left, const Object& right) const -> bool {
   std::optional<double> left_num = left.AsDouble();
