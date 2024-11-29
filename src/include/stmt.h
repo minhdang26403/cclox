@@ -2,6 +2,7 @@
 #define STMT_H_
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "expr.h"
@@ -33,7 +34,7 @@ using StmtPtr = std::variant<BlockStmtPtr, ClassStmtPtr, ExprStmtPtr,
 
 class BlockStmt {
  public:
-  BlockStmt(std::vector<StmtPtr> statements)
+  explicit BlockStmt(std::vector<StmtPtr> statements)
       : statements_(std::move(statements)) {}
 
   auto GetStatements() const noexcept -> const std::vector<StmtPtr>& {

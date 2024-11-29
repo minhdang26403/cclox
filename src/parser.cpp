@@ -335,7 +335,8 @@ auto Parser::Synchronize() noexcept -> void {
       case PRINT:
       case RETURN:
         return;
-      default:;
+      default: {
+      };
     }
 
     Advance();

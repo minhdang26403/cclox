@@ -1,7 +1,10 @@
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 
+#include <memory>
+#include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "object.h"
 #include "token.h"
@@ -16,7 +19,7 @@ class Environment {
    * environment.
    * @param enclosing The enclosing environment.
    */
-  Environment(std::shared_ptr<Environment> enclosing)
+  explicit Environment(std::shared_ptr<Environment> enclosing)
       : enclosing_(std::move(enclosing)) {}
 
   auto Get(const Token& variable) const -> Object;

@@ -6,6 +6,7 @@
 #include <string>
 #include <type_traits>
 #include <variant>
+#include <utility>
 
 namespace cclox {
 /**
@@ -43,7 +44,7 @@ class Object {
    */
   template<typename T>
     requires std::is_convertible_v<T, ValueType>
-  Object(T&& value) : value_(std::forward<T>(value)) {}
+  explicit Object(T&& value) : value_(std::forward<T>(value)) {}
 
   auto operator=(const Object& other) -> Object& = default;
 

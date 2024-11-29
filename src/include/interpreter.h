@@ -4,6 +4,8 @@
 #include <format>
 #include <memory>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "environment.h"
 #include "expr.h"
@@ -42,7 +44,7 @@ class Interpreter {
    */
   auto Interpret(const std::vector<StmtPtr>& statements) -> void;
 
-  //====================Methods to handle statement====================
+  // ====================Methods to handle statement====================
   auto ExecuteStatement(const StmtPtr& stmt) -> void;
 
   auto operator()(const BlockStmtPtr& stmt) -> void;
@@ -66,7 +68,7 @@ class Interpreter {
   auto ExecuteBlockStatement(const std::vector<StmtPtr>& statements,
                              std::shared_ptr<Environment> environment) -> void;
 
-  //====================Methods to handle expressions====================
+  // ====================Methods to handle expressions====================
   /**
    * @brief Helper function to evaluate an expression.
    * @param expr The expression to evaluate.

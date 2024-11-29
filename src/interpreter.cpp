@@ -24,7 +24,7 @@ auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
   }
 }
 
-//====================Methods to handle statement====================
+// ====================Methods to handle statement====================
 auto Interpreter::ExecuteStatement(const StmtPtr& stmt) -> void {
   std::visit(*this, stmt);
 }
@@ -37,18 +37,16 @@ auto Interpreter::operator()(const BlockStmtPtr& stmt) -> void {
   ExecuteBlockStatement(stmt->GetStatements(), std::move(inner_env));
 }
 
-auto Interpreter::operator()(const ClassStmtPtr& stmt [[maybe_unused]])
-    -> void {}
+auto Interpreter::operator()(const ClassStmtPtr&) -> void {}
 
 auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
   assert(stmt);
   EvaluateExpression(stmt->GetExpression());
 }
 
-auto Interpreter::operator()(const FunctionStmtPtr& stmt [[maybe_unused]])
-    -> void {}
+auto Interpreter::operator()(const FunctionStmtPtr&) -> void {}
 
-auto Interpreter::operator()(const IfStmtPtr& stmt [[maybe_unused]]) -> void {}
+auto Interpreter::operator()(const IfStmtPtr&) -> void {}
 
 auto Interpreter::operator()(const PrintStmtPtr& stmt) -> void {
   assert(stmt);
@@ -56,8 +54,7 @@ auto Interpreter::operator()(const PrintStmtPtr& stmt) -> void {
   std::cout << value.ToString() << '\n';
 }
 
-auto Interpreter::operator()(const ReturnStmtPtr& stmt [[maybe_unused]])
-    -> void {}
+auto Interpreter::operator()(const ReturnStmtPtr&) -> void {}
 
 auto Interpreter::operator()(const VarStmtPtr& stmt) -> void {
   assert(stmt);
@@ -70,8 +67,7 @@ auto Interpreter::operator()(const VarStmtPtr& stmt) -> void {
   environment_->Define(stmt->GetVariable().GetLexeme(), value);
 }
 
-auto Interpreter::operator()(const WhileStmtPtr& stmt [[maybe_unused]])
-    -> void {}
+auto Interpreter::operator()(const WhileStmtPtr&) -> void {}
 
 auto Interpreter::ExecuteBlockStatement(
     const std::vector<StmtPtr>& statements,
@@ -88,12 +84,12 @@ auto Interpreter::ExecuteBlockStatement(
     // Rethrow the exception.
     throw;
   }
-  
+
   // Restore the current environment if no exception is thrown.
   environment_ = std::move(previous);
 }
 
-//====================Methods to handle expressions====================
+// ====================Methods to handle expressions====================
 auto Interpreter::EvaluateExpression(const ExprPtr& expr) -> Object {
   return std::visit(*this, expr);
 }
@@ -116,17 +112,17 @@ auto Interpreter::operator()(const BinaryExprPtr& expr) -> Object {
 
   switch (op.GetType()) {
     case BANG_EQUAL:
-      return !Equal(left, right);
+      return Object{!Equal(left, right)};
     case EQUAL_EQUAL:
-      return Equal(left, right);
+      return Object{Equal(left, right)};
     case GREATER:
-      return Greater(left, op, right);
+      return Object{Greater(left, op, right)};
     case GREATER_EQUAL:
-      return !Less(left, op, right);
+      return Object{!Less(left, op, right)};
     case LESS:
-      return Less(left, op, right);
+      return Object{Less(left, op, right)};
     case LESS_EQUAL:
-      return !Greater(left, op, right);
+      return Object{!Greater(left, op, right)};
     case MINUS:
       return Subtract(left, op, right);
     case PLUS:
@@ -162,7 +158,7 @@ auto Interpreter::operator()(const UnaryExprPtr& expr) -> Object {
 
   switch (op.GetType()) {
     case BANG:
-      return !right.IsTruthy();
+      return Object{!right.IsTruthy()};
     case MINUS:
       return Subtract(Object{static_cast<int32_t>(0)}, op, right);
     default:

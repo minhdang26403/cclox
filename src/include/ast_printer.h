@@ -2,6 +2,8 @@
 #define AST_PRINTER_H_
 
 #include <format>
+#include <string>
+
 #include "expr.h"
 #include "stmt.h"
 
