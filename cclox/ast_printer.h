@@ -3,6 +3,7 @@
 
 #include <format>
 #include "expr.h"
+#include "stmt.h"
 
 namespace cclox {
 /**
@@ -22,6 +23,60 @@ namespace cclox {
  */
 class ASTPrinter {
  public:
+  // ====================AST Printer for Statements====================
+  auto Print(const StmtPtr& stmt) const -> std::string {
+    return std::visit(*this, stmt);
+  }
+
+  auto operator()(const BlockStmtPtr& block_stmt) const -> std::string {
+    std::string s = "(block ";
+
+    for (const auto& stmt : block_stmt->GetStatements()) {
+      s.append(Print(stmt));
+    }
+    s.push_back(')');
+
+    return s;
+  }
+
+  auto operator()(const ClassStmtPtr&) const -> std::string {
+    return "";
+  }
+
+  auto operator()(const ExprStmtPtr& stmt) const -> std::string {
+    return Parenthesize(";", stmt->GetExpression());
+  }
+
+  auto operator()(const FunctionStmtPtr&) const -> std::string {
+    return "";
+  }
+
+  auto operator()(const IfStmtPtr&) const -> std::string {
+    return "";
+  }
+
+  auto operator()(const PrintStmtPtr& stmt) const -> std::string {
+    return Parenthesize("print", stmt->GetExpression());
+  }
+
+  auto operator()(const ReturnStmtPtr&) const -> std::string {
+    return "";
+  }
+
+  auto operator()(const VarStmtPtr& stmt) const -> std::string {
+    const auto& initializer_opt = stmt->GetInitializer();
+    if (initializer_opt) {
+      return std::format("(var {} = {})", stmt->GetVariable().GetLexeme(), Print(*initializer_opt));
+    }
+
+    return std::format("(var {})", stmt->GetVariable().GetLexeme());
+  }
+
+  auto operator()(const WhileStmtPtr&) const -> std::string {
+    return "";
+  }
+
+  // ====================AST Printer for Expressions====================
   /**
    * @brief Prints the abstract syntax tree.
    * @param expr the top expression of the AST.
