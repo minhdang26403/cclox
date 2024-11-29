@@ -18,7 +18,7 @@ bool Lox::had_error = false;
 bool Lox::had_runtime_error = false;
 
 auto Lox::RunFile(std::string_view path) -> void {
-  std::ifstream file{path};
+  std::ifstream file{path.data()};
 
   // Check if the file was opened successfully.
   if (!file.is_open()) {
@@ -53,6 +53,9 @@ auto Lox::RunPrompt() -> void {
       break;
     }
     Run(std::move(line));
+    // The string `line` is left in a valid but unspecified state after move, so
+    // `clear()` to reset the string state to avoid clang-tidy warning.
+    line.clear();
     // Reset this flag in the interactive loop. If the user makes a mistake,
     // it shouldn't kill their entire session
     had_error = false;
