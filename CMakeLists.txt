@@ -11,7 +11,11 @@ project(CraftingInterpreter VERSION 2024.1
 # COMPILER SETUP
 # #####################################################################################################################
 
-# Set the binary directory within the build folder
+# Expected directory structure.
+
+# Output directory
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(NOT DEFINED SANITIZER)
@@ -21,6 +25,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror -Wconversion")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -fsanitize=${SANITIZER} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
 
+# GoogleTest
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -31,7 +36,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include(GoogleTest)
 
+include_directories(${PROJECT_SOURCE_DIR}/src/include)
 
-include_directories(cclox)
-add_subdirectory(cclox)
+add_subdirectory(src)
 add_subdirectory(test)
