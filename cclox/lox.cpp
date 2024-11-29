@@ -19,8 +19,21 @@ bool Lox::had_runtime_error = false;
 
 auto Lox::RunFile(std::string_view path) -> void {
   std::ifstream file{path};
+
+  // Check if the file was opened successfully.
+  if (!file.is_open()) {
+    std::cerr << "Error: Unable to open file: " << path << std::endl;
+    std::exit(EX_NOINPUT);
+  }
+
   std::stringstream buffer;
   buffer << file.rdbuf();
+  // Check if reading the file was successful.
+  if (file.fail() && !file.eof()) {
+    std::cerr << "Error: Failed to read from file: " << path << std::endl;
+    std::exit(EX_IOERR);
+  }
+
   Run(buffer.str());
 
   // Indicate an error in the exit code.
