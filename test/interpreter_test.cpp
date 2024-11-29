@@ -10,7 +10,8 @@
 #include "stmt.h"
 #include "token.h"
 
-using namespace cclox;
+using cclox::Scanner, cclox::Parser, cclox::Interpreter;
+using cclox::StmtPtr, cclox::ExprStmtPtr;
 
 TEST(InterpreterTest, BasicLiteralsTest) {
   std::string source =
