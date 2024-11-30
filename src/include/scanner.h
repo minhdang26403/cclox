@@ -4,8 +4,8 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "lox.h"
 #include "token.h"
@@ -23,6 +23,9 @@ class Scanner {
    * @param source The source code to scan.
    */
   explicit Scanner(std::string source) : source_(std::move(source)) {}
+
+  Scanner(std::string source, std::ostream& output)
+      : source_(std::move(source)), output_(output) {}
 
   /**
    * @brief Scans the source code and returns a list of tokens.
@@ -137,6 +140,9 @@ class Scanner {
   uint32_t current_{0};
   // The current line number in the source code.
   uint32_t line_number_{1};
+
+  // The output stream to log error messages or print values from Lox programs.
+  std::ostream& output_{std::cout};
 };
 }  // namespace cclox
 

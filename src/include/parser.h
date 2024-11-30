@@ -59,6 +59,9 @@ class Parser {
    */
   explicit Parser(std::vector<Token> tokens) : tokens_(std::move(tokens)) {}
 
+  explicit Parser(std::vector<Token> tokens, std::ostream& output)
+      : tokens_(std::move(tokens)), output_(output) {}
+
   auto Parse() -> std::vector<StmtPtr>;
 
  private:
@@ -204,6 +207,9 @@ class Parser {
   std::vector<Token> tokens_;
   // Pointer to the next token to be parsed.
   uint32_t current_{0};
+
+  // The output stream to log error messages or print values from Lox programs.
+  std::ostream& output_{std::cout};
 };
 }  // namespace cclox
 

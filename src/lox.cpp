@@ -46,6 +46,11 @@ auto Lox::RunFile(std::string_view path) -> void {
 }
 
 auto Lox::RunPrompt() -> void {
+  if (&output_ != &std::cout) {
+    std::cerr << "Error: The Lox REPL must be run with the standard output "
+                 "stream (std::cout)\n";
+    std::exit(EX_USAGE);
+  }
   std::string line;
   while (true) {
     std::cout << "> ";
@@ -62,36 +67,39 @@ auto Lox::RunPrompt() -> void {
   }
 }
 
-auto Lox::Error(uint32_t line_number, std::string_view message) -> void {
-  Report(line_number, "", message);
+auto Lox::Error(std::ostream& output, uint32_t line_number,
+                std::string_view message) -> void {
+  Report(output, line_number, "", message);
 }
 
-auto Lox::Error(const Token& token, std::string_view message) -> void {
+auto Lox::Error(std::ostream& output, const Token& token,
+                std::string_view message) -> void {
   if (token.GetType() == TokenType::EoF) {
-    Report(token.GetLineNumber(), " at end", message);
+    Report(output, token.GetLineNumber(), " at end", message);
   } else {
-    Report(token.GetLineNumber(), std::format(" at '{}'", token.GetLexeme()),
-           message);
+    Report(output, token.GetLineNumber(),
+           std::format(" at '{}'", token.GetLexeme()), message);
   }
 }
 
-auto Lox::ReportRuntimeError(const RuntimeError& error) -> void {
-  std::cout << std::format("{}\n[line {}]\n", error.what(),
-                           error.token_.GetLineNumber());
+auto Lox::ReportRuntimeError(std::ostream& output, const RuntimeError& error)
+    -> void {
+  output << std::format("{}\n[line {}]\n", error.what(),
+                        error.token_.GetLineNumber());
   had_runtime_error = true;
 }
 
 // =========================Private Methods=========================
 
 auto Lox::Run(std::string source) -> void {
-  Scanner scanner{std::move(source)};
+  Scanner scanner{std::move(source), output_};
   std::vector<Token> tokens = scanner.ScanTokens();
   // Stop if there was a lexing error.
   if (had_error) {
     return;
   }
 
-  Parser parser{std::move(tokens)};
+  Parser parser{std::move(tokens), output_};
   std::vector<StmtPtr> statements = parser.Parse();
   // Stop if there was a parsing error.
   if (had_error) {
@@ -101,10 +109,17 @@ auto Lox::Run(std::string source) -> void {
   interpreter_.Interpret(statements);
 }
 
-auto Lox::Report(uint32_t line_number, std::string_view where,
-                 std::string_view message) -> void {
-  std::cout << std::format("[line {}] Error{}: {}\n", line_number, where,
-                           message);
+auto Lox::ResetLoxInterpreterState() noexcept -> void {
+  // Since `had_error` and `had_runtime_error` are static variables, their
+  // lifetime is the program's lifetime. Thus, we have to reset these variables
+  // every time we create a new Lox instance.
+  had_error = false;
+  had_runtime_error = false;
+}
+
+auto Lox::Report(std::ostream& output, uint32_t line_number,
+                 std::string_view where, std::string_view message) -> void {
+  output << std::format("[line {}] Error{}: {}\n", line_number, where, message);
   had_error = true;
 }
 }  // namespace cclox

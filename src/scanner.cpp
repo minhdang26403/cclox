@@ -133,7 +133,7 @@ auto Scanner::ScanToken() -> void {
       } else if (IsAlpha(c)) {
         ScanIdentifier();
       } else {
-        Lox::Error(line_number_, "Unexpected character.");
+        Lox::Error(output_, line_number_, "Unexpected character.");
       }
       break;
   }
@@ -189,7 +189,7 @@ auto Scanner::ScanString() -> void {
   }
 
   if (IsAtEnd()) {
-    Lox::Error(line_number_, "Unterminated string.");
+    Lox::Error(output_, line_number_, "Unterminated string.");
     return;
   }
 

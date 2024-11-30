@@ -20,7 +20,7 @@ auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
       ExecuteStatement(statement);
     }
   } catch (const RuntimeError& error) {
-    Lox::ReportRuntimeError(error);
+    Lox::ReportRuntimeError(output_, error);
   }
 }
 

@@ -310,7 +310,7 @@ auto Parser::Previous() const noexcept -> Token {
 
 auto Parser::Error(const Token& token, std::string_view message) const
     -> ParseError {
-  Lox::Error(token, message);
+  Lox::Error(output_, token, message);
   return ParseError{message};
 }
 
