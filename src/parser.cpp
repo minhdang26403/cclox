@@ -102,8 +102,7 @@ auto Parser::ParseVarDeclaration() -> StmtPtr {
   }
 
   Consume(SEMICOLON, "Expect ';' after variable declaration.");
-  return StmtPtr{
-      std::make_unique<VarStmt>(std::move(name), std::move(initializer))};
+  return std::make_unique<VarStmt>(std::move(name), std::move(initializer));
 }
 
 auto Parser::ParseStatement() -> StmtPtr {
@@ -111,7 +110,7 @@ auto Parser::ParseStatement() -> StmtPtr {
     return ParsePrintStatement();
   }
   if (Match(TokenType::LEFT_BRACE)) {
-    return StmtPtr{std::make_unique<BlockStmt>(ParseBlockStatement())};
+    return std::make_unique<BlockStmt>(ParseBlockStatement());
   }
 
   return ParseExpressionStatement();
@@ -121,14 +120,14 @@ auto Parser::ParsePrintStatement() -> StmtPtr {
   ExprPtr value = ParseExpression();
   Consume(TokenType::SEMICOLON, "Expect ';' after value.");
 
-  return StmtPtr{std::make_unique<PrintStmt>(std::move(value))};
+  return std::make_unique<PrintStmt>(std::move(value));
 }
 
 auto Parser::ParseExpressionStatement() -> StmtPtr {
   ExprPtr expr = ParseExpression();
   Consume(TokenType::SEMICOLON, "Expect ';' after expression.");
 
-  return StmtPtr{std::make_unique<ExprStmt>(std::move(expr))};
+  return std::make_unique<ExprStmt>(std::move(expr));
 }
 
 auto Parser::ParseBlockStatement() -> std::vector<StmtPtr> {
@@ -156,7 +155,7 @@ auto Parser::ParseAssignment() -> ExprPtr {
 
     if (variable_expr_ptr) {
       const Token& variable = (*variable_expr_ptr)->GetVariable();
-      return ExprPtr{std::make_unique<AssignExpr>(variable, std::move(value))};
+      return std::make_unique<AssignExpr>(variable, std::move(value));
     }
 
     throw Error(equals, "Invalid assignment target.");
@@ -172,8 +171,8 @@ auto Parser::ParseEquality() -> ExprPtr {
   while (Match(BANG_EQUAL, EQUAL_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseComparison();
-    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                                std::move(right))};
+    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                        std::move(right));
   }
 
   return expr;
@@ -186,8 +185,8 @@ auto Parser::ParseComparison() -> ExprPtr {
   while (Match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseTerm();
-    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                                std::move(right))};
+    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                        std::move(right));
   }
 
   return expr;
@@ -200,8 +199,8 @@ auto Parser::ParseTerm() -> ExprPtr {
   while (Match(MINUS, PLUS)) {
     Token op = Previous();
     ExprPtr right = ParseFactor();
-    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                                std::move(right))};
+    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                        std::move(right));
   }
 
   return expr;
@@ -214,8 +213,8 @@ auto Parser::ParseFactor() -> ExprPtr {
   while (Match(SLASH, STAR)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    expr = ExprPtr{std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                                std::move(right))};
+    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
+                                        std::move(right));
   }
 
   return expr;
@@ -226,8 +225,7 @@ auto Parser::ParseUnary() -> ExprPtr {
   if (Match(BANG, MINUS)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    return ExprPtr{
-        std::make_unique<UnaryExpr>(std::move(op), std::move(right))};
+    return std::make_unique<UnaryExpr>(std::move(op), std::move(right));
   }
 
   return ParsePrimary();
@@ -236,19 +234,19 @@ auto Parser::ParseUnary() -> ExprPtr {
 auto Parser::ParsePrimary() -> ExprPtr {
   using enum TokenType;
   if (Match(FALSE)) {
-    return ExprPtr{std::make_unique<LiteralExpr>(false)};
+    return std::make_unique<LiteralExpr>(Object{false});
   }
 
   if (Match(TRUE)) {
-    return ExprPtr{std::make_unique<LiteralExpr>(true)};
+    return std::make_unique<LiteralExpr>(Object{true});
   }
 
   if (Match(NIL)) {
-    return ExprPtr{std::make_unique<LiteralExpr>(nullptr)};
+    return std::make_unique<LiteralExpr>(Object{nullptr});
   }
 
   if (Match(NUMBER, STRING)) {
-    return ExprPtr{std::make_unique<LiteralExpr>(Previous().GetLiteral())};
+    return std::make_unique<LiteralExpr>(Previous().GetLiteral());
   }
 
   if (Match(IDENTIFIER)) {
@@ -258,7 +256,7 @@ auto Parser::ParsePrimary() -> ExprPtr {
   if (Match(LEFT_PAREN)) {
     ExprPtr expr = ParseExpression();
     Consume(RIGHT_PAREN, "Expect ')' after expression.");
-    return ExprPtr{std::make_unique<GroupingExpr>(std::move(expr))};
+    return std::make_unique<GroupingExpr>(std::move(expr));
   }
 
   throw Error(Peek(), "Expect expression.");
