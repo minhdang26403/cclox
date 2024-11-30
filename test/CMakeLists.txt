@@ -1,5 +1,6 @@
 set(TESTS
   interpreter_test
+  expression_test
 )
 
 # Loop through each test
