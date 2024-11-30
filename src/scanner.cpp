@@ -182,7 +182,7 @@ auto Scanner::ScanNumber() -> void {
 
 auto Scanner::ScanString() -> void {
   while (Peek() != '"' && !IsAtEnd()) {
-    if (Peek() != '\n') {
+    if (Peek() == '\n') {
       line_number_++;
     }
     Advance();
