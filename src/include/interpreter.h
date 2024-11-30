@@ -38,7 +38,7 @@ class Interpreter {
  public:
   Interpreter() = default;
 
-  Interpreter(std::ostream& output) : output_(output) {}
+  explicit Interpreter(std::ostream& output) : output_(output) {}
 
   /**
    * @brief Evaluates an expression and prints its result.

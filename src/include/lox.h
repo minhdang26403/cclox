@@ -15,7 +15,7 @@ class Lox {
  public:
   Lox() { ResetLoxInterpreterState(); }
 
-  Lox(std::ostream& output) : output_(output), interpreter_(output_) {
+  explicit Lox(std::ostream& output) : output_(output), interpreter_(output_) {
     ResetLoxInterpreterState();
   }
 

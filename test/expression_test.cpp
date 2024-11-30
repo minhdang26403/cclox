@@ -1,10 +1,9 @@
-#include "interpreter.h"
-
 #include <gtest/gtest.h>
 #include <cstddef>
 #include <variant>
 #include <vector>
 
+#include "interpreter.h"
 #include "parser.h"
 #include "scanner.h"
 #include "stmt.h"
