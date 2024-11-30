@@ -13,6 +13,10 @@ namespace cclox {
  */
 class Lox {
  public:
+  Lox() = default;
+
+  Lox(std::ostream& output) : output_(output), interpreter_(output_) {}
+
   /**
    * @brief Runs the Lox interpreter from the specified source file.
    * @param path The path to the Lox script file to be executed.
@@ -64,7 +68,8 @@ class Lox {
   static auto Report(uint32_t line_number, std::string_view where,
                      std::string_view message) -> void;
 
-  Interpreter interpreter_;
+  std::ostream& output_{std::cout};
+  Interpreter interpreter_{output_};
   // A flag indicating whether an error has occurred.
   static bool had_error;
   static bool had_runtime_error;

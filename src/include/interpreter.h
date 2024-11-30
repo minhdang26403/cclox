@@ -36,7 +36,9 @@ class RuntimeError : public std::runtime_error {
  */
 class Interpreter {
  public:
-  Interpreter() : environment_(std::make_shared<Environment>()) {}
+  Interpreter() = default;
+
+  Interpreter(std::ostream& output) : output_(output) {}
 
   /**
    * @brief Evaluates an expression and prints its result.
@@ -189,7 +191,8 @@ class Interpreter {
       -> std::pair<double, double>;
 
   // The environment that stores variables' values.
-  std::shared_ptr<Environment> environment_;
+  std::shared_ptr<Environment> environment_{std::make_shared<Environment>()};
+  std::ostream& output_{std::cout};
 };
 }  // namespace cclox
 

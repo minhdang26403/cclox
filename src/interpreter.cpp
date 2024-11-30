@@ -51,7 +51,7 @@ auto Interpreter::operator()(const IfStmtPtr&) -> void {}
 auto Interpreter::operator()(const PrintStmtPtr& stmt) -> void {
   assert(stmt);
   Object value = EvaluateExpression(stmt->GetExpression());
-  std::cout << value.ToString() << '\n';
+  output_ << value.ToString() << '\n';
 }
 
 auto Interpreter::operator()(const ReturnStmtPtr&) -> void {}
