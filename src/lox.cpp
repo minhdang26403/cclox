@@ -38,10 +38,10 @@ auto Lox::RunFile(std::string_view path) -> void {
 
   // Indicate an error in the exit code.
   if (had_error) {
-    std::exit(EX_DATAERR);
+    return;
   }
   if (had_runtime_error) {
-    std::exit(EX_SOFTWARE);
+    return;
   }
 }
 
