@@ -30,7 +30,6 @@ auto Environment::Assign(const Token& variable, const Object& value) -> void {
     enclosing_->Assign(variable, value);
   }
 
-  throw new RuntimeError(variable,
-                         "Undefined variable '" + variable_name + "'.");
+  throw RuntimeError(variable, "Undefined variable '" + variable_name + "'.");
 }
 }  // namespace cclox
