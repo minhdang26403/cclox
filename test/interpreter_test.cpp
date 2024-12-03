@@ -61,6 +61,7 @@ INSTANTIATE_TEST_SUITE_P(InterpreterSuite, InterpreterTest,
                              "../../test/bool",
                              "../../test/number",
                              "../../test/operator",
+                             "../../test/string",
                          })));
 
 // Test each `.lox` file by comparing it to the expected `.txt` file
