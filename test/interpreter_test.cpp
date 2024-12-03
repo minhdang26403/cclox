@@ -58,6 +58,7 @@ INSTANTIATE_TEST_SUITE_P(InterpreterSuite, InterpreterTest,
                          ::testing::ValuesIn(CollectTestFiles({
                              "../../test/assignment",
                              "../../test/block",
+                             "../../test/bool",
                          })));
 
 // Test each `.lox` file by comparing it to the expected `.txt` file
