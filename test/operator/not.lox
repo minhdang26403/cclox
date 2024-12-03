@@ -1,0 +1,7 @@
+print !true;
+print !false;
+print !!true;
+print !123;
+print !0;
+print !nil;
+print !"";

@@ -1,0 +1,3 @@
+print 260 + 004;
+print "abc" + "def";
+true + nil;

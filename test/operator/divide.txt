@@ -1,0 +1,6 @@
+5
+2
+2.5
+1
+RuntimeError: Operands must be numbers.
+[line 5]

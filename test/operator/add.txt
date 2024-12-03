@@ -1,0 +1,4 @@
+264
+abcdef
+RuntimeError: Operands must be two numbers or two strings.
+[line 3]
