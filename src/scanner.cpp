@@ -1,4 +1,6 @@
 #include "scanner.h"
+#include <stdexcept>
+#include "object.h"
 #include "token.h"
 #include "token_type.h"
 
@@ -169,13 +171,23 @@ auto Scanner::ScanNumber() -> void {
   }
 
   std::string num_str = source_.substr(start_, current_ - start_);
+  std::variant<int32_t, double> num;
 
   if (num_str.find('.') != std::string::npos ||
       num_str.find('e') != std::string::npos) {
-    Object value{std::stod(num_str)};
+    num = std::stod(num_str);
+  } else
+    try {
+      num = std::stoi(num_str);
+    } catch (const std::out_of_range&) {
+      num = std::stod(num_str);
+    }
+
+  if (auto pval = std::get_if<int32_t>(&num)) {
+    Object value{*pval};
     AddToken(TokenType::NUMBER, value);
-  } else {
-    Object value{std::stoi(num_str)};
+  } else if (auto pval = std::get_if<double>(&num)) {
+    Object value{*pval};
     AddToken(TokenType::NUMBER, value);
   }
 }
