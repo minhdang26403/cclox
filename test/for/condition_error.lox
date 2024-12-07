@@ -1,0 +1,4 @@
+// Expect an error at '{'. The parser synchronizes and skips this part,
+// so it treats the next part (increment) as condition,
+// leading to lack of semicolon error at ')'.
+for (var a = 1; {}; a = a + 1) {}

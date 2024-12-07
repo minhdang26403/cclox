@@ -1,0 +1,4 @@
+// Expect an error since a declaration statement cannot be immediately after the for statement.
+// The declaration statement must be in a block statement.
+// Lox only allows certain statements such as if, print, while, etc.
+for (;;) var foo;

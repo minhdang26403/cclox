@@ -1,0 +1,3 @@
+// Expect an error at '{'. Since this is the last part of the
+// for statement, the parser just skips to the next token.
+for (var a = 1; a < 2; {}) {}

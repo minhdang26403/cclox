@@ -1,0 +1,2 @@
+// Expect an error at '{' and a cascading error at ')' in the increment statement.
+for ({}; a < 2; a = a + 1) {}
