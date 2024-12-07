@@ -1,0 +1,9 @@
+// false, nil, 0, "" are considered as FALSE.
+if (false) print "bad"; else print "false is FALSE"; // expect: false
+if (nil) print "bad"; else print "nil is FALSE"; // expect: nil
+if (0) print "bad"; else print "0 is FALSE!";
+if ("") print "bad"; else print "an empty string is FALSE!";
+
+// Everything else is true.
+if (true) print true; // expect: true
+if (1) print 1;

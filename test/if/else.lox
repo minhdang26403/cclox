@@ -1,0 +1,6 @@
+// Evaluate the 'else' expression if the condition is false.
+if (true) print "foo"; else print "bar"; // expect: foo
+if (false) print "foo"; else print "bar"; // expect: bar
+
+// Allow block body.
+if (false) nil; else { print "block"; } // expect: block

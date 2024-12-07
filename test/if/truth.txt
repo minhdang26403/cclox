@@ -1,0 +1,6 @@
+false is FALSE
+nil is FALSE
+0 is FALSE!
+an empty string is FALSE!
+true
+1

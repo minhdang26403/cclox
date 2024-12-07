@@ -1,0 +1,2 @@
+// Expect an error since a 'var' declaration cannot immediately follow the else statement.
+if (true) "ok"; else var foo;

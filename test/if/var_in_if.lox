@@ -1,0 +1,2 @@
+// Expect an error.
+if (true) var foo;
