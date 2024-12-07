@@ -1,0 +1,8 @@
+// false, nil, 0, and "" are FALSE.
+print false and "bad"; // expect: false
+print nil and "bad"; // expect: nil
+print 0 and "ok"; // expect: 0
+print "" and "ok"; // expect: ""
+
+// Everything else is true.
+print true and "ok"; // expect: ok
