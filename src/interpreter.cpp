@@ -48,10 +48,11 @@ auto Interpreter::operator()(const FunctionStmtPtr&) -> void {}
 
 auto Interpreter::operator()(const IfStmtPtr& stmt) -> void {
   Object result = EvaluateExpression(stmt->GetCondition());
+  const std::optional<StmtPtr>& else_branch_opt = stmt->GetElseBranch();
   if (result.IsTruthy()) {
     ExecuteStatement(stmt->GetThenBranch());
-  } else if (stmt->HasElseBranch()) {
-    ExecuteStatement(stmt->GetElseBranch());
+  } else if (else_branch_opt) {
+    ExecuteStatement(else_branch_opt.value());
   }
 }
 

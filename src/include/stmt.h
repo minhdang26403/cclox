@@ -72,11 +72,7 @@ class IfStmt {
 
   auto GetThenBranch() const noexcept -> const StmtPtr& { return then_branch_; }
 
-  auto HasElseBranch() const noexcept -> bool {
-    return else_branch_.has_value();
-  }
-
-  auto GetElseBranch() const -> const StmtPtr& { return else_branch_.value(); }
+  auto GetElseBranch() const noexcept -> const std::optional<StmtPtr>& { return else_branch_; }
 
  private:
   ExprPtr condition_;

@@ -61,7 +61,7 @@ class ASTPrinter {
     const auto& initializer_opt = stmt->GetInitializer();
     if (initializer_opt) {
       return std::format("(var {} = {})", stmt->GetVariable().GetLexeme(),
-                         Print(*initializer_opt));
+                         Print(initializer_opt.value()));
     }
 
     return std::format("(var {})", stmt->GetVariable().GetLexeme());
