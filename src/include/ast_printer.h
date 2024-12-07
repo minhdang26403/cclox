@@ -41,42 +41,33 @@ class ASTPrinter {
     return s;
   }
 
-  auto operator()(const ClassStmtPtr&) const -> std::string {
-    return "";
-  }
+  auto operator()(const ClassStmtPtr&) const -> std::string { return ""; }
 
   auto operator()(const ExprStmtPtr& stmt) const -> std::string {
     return Parenthesize(";", stmt->GetExpression());
   }
 
-  auto operator()(const FunctionStmtPtr&) const -> std::string {
-    return "";
-  }
+  auto operator()(const FunctionStmtPtr&) const -> std::string { return ""; }
 
-  auto operator()(const IfStmtPtr&) const -> std::string {
-    return "";
-  }
+  auto operator()(const IfStmtPtr&) const -> std::string { return ""; }
 
   auto operator()(const PrintStmtPtr& stmt) const -> std::string {
     return Parenthesize("print", stmt->GetExpression());
   }
 
-  auto operator()(const ReturnStmtPtr&) const -> std::string {
-    return "";
-  }
+  auto operator()(const ReturnStmtPtr&) const -> std::string { return ""; }
 
   auto operator()(const VarStmtPtr& stmt) const -> std::string {
     const auto& initializer_opt = stmt->GetInitializer();
     if (initializer_opt) {
-      return std::format("(var {} = {})", stmt->GetVariable().GetLexeme(), Print(*initializer_opt));
+      return std::format("(var {} = {})", stmt->GetVariable().GetLexeme(),
+                         Print(*initializer_opt));
     }
 
     return std::format("(var {})", stmt->GetVariable().GetLexeme());
   }
 
-  auto operator()(const WhileStmtPtr&) const -> std::string {
-    return "";
-  }
+  auto operator()(const WhileStmtPtr&) const -> std::string { return ""; }
 
   // ====================AST Printer for Expressions====================
   /**
@@ -120,6 +111,11 @@ class ASTPrinter {
    */
   auto operator()(const LiteralExprPtr& expr) const -> std::string {
     return expr->GetValue().ToString();
+  }
+
+  auto operator()(const LogicalExprPtr& expr) const -> std::string {
+    return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpr(),
+                        expr->GetRightExpr());
   }
 
   /**

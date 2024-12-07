@@ -101,6 +101,8 @@ class Interpreter {
    */
   auto operator()(const LiteralExprPtr& expr) -> Object;
 
+  auto operator()(const LogicalExprPtr& expr) -> Object;
+
   /**
    * @brief Evaluates a unary expression (e.g., -a, !b).
    * @param expr The unary expression to evaluate.

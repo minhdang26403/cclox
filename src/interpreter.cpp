@@ -46,7 +46,14 @@ auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
 
 auto Interpreter::operator()(const FunctionStmtPtr&) -> void {}
 
-auto Interpreter::operator()(const IfStmtPtr&) -> void {}
+auto Interpreter::operator()(const IfStmtPtr& stmt) -> void {
+  Object result = EvaluateExpression(stmt->GetCondition());
+  if (result.IsTruthy()) {
+    ExecuteStatement(stmt->GetThenBranch());
+  } else if (stmt->HasElseBranch()) {
+    ExecuteStatement(stmt->GetElseBranch());
+  }
+}
 
 auto Interpreter::operator()(const PrintStmtPtr& stmt) -> void {
   assert(stmt);
@@ -67,7 +74,11 @@ auto Interpreter::operator()(const VarStmtPtr& stmt) -> void {
   environment_->Define(stmt->GetVariable().GetLexeme(), value);
 }
 
-auto Interpreter::operator()(const WhileStmtPtr&) -> void {}
+auto Interpreter::operator()(const WhileStmtPtr& stmt) -> void {
+  while (EvaluateExpression(stmt->GetCondition()).IsTruthy()) {
+    ExecuteStatement(stmt->GetBody());
+  }
+}
 
 auto Interpreter::ExecuteBlockStatement(
     const std::vector<StmtPtr>& statements,
@@ -147,6 +158,23 @@ auto Interpreter::operator()(const GroupingExprPtr& expr) -> Object {
 auto Interpreter::operator()(const LiteralExprPtr& expr) -> Object {
   assert(expr);
   return expr->GetValue();
+}
+
+auto Interpreter::operator()(const LogicalExprPtr& expr) -> Object {
+  assert(expr);
+  Object left = EvaluateExpression(expr->GetLeftExpr());
+
+  if (expr->GetOperator().GetType() == TokenType::OR) {
+    if (left.IsTruthy()) {
+      return left;
+    }
+  } else {
+    if (!left.IsTruthy()) {
+      return left;
+    }
+  }
+
+  return EvaluateExpression(expr->GetRightExpr());
 }
 
 auto Interpreter::operator()(const UnaryExprPtr& expr) -> Object {

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "expr.h"
@@ -59,7 +60,29 @@ class ExprStmt {
 
 class FunctionStmt {};
 
-class IfStmt {};
+class IfStmt {
+ public:
+  IfStmt(ExprPtr condition, StmtPtr then_branch,
+         std::optional<StmtPtr> else_branch)
+      : condition_(std::move(condition)),
+        then_branch_(std::move(then_branch)),
+        else_branch_(std::move(else_branch)) {}
+
+  auto GetCondition() const noexcept -> const ExprPtr& { return condition_; }
+
+  auto GetThenBranch() const noexcept -> const StmtPtr& { return then_branch_; }
+
+  auto HasElseBranch() const noexcept -> bool {
+    return else_branch_.has_value();
+  }
+
+  auto GetElseBranch() const -> const StmtPtr& { return else_branch_.value(); }
+
+ private:
+  ExprPtr condition_;
+  StmtPtr then_branch_;
+  std::optional<StmtPtr> else_branch_;
+};
 
 class PrintStmt {
  public:
@@ -89,7 +112,19 @@ class VarStmt {
   std::optional<ExprPtr> initializer_;
 };
 
-class WhileStmt {};
+class WhileStmt {
+ public:
+  WhileStmt(ExprPtr condition, StmtPtr body)
+      : condition_(std::move(condition)), body_(std::move(body)) {}
+
+  auto GetCondition() const noexcept -> const ExprPtr& { return condition_; }
+
+  auto GetBody() const noexcept -> const StmtPtr& { return body_; }
+
+ private:
+  ExprPtr condition_;
+  StmtPtr body_;
+};
 
 }  // namespace cclox
 

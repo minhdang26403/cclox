@@ -176,12 +176,13 @@ auto Scanner::ScanNumber() -> void {
   if (num_str.find('.') != std::string::npos ||
       num_str.find('e') != std::string::npos) {
     num = std::stod(num_str);
-  } else
+  } else {
     try {
       num = std::stoi(num_str);
     } catch (const std::out_of_range&) {
       num = std::stod(num_str);
     }
+  }
 
   if (auto pval = std::get_if<int32_t>(&num)) {
     Object value{*pval};

@@ -106,8 +106,17 @@ auto Parser::ParseVarDeclaration() -> StmtPtr {
 }
 
 auto Parser::ParseStatement() -> StmtPtr {
+  if (Match(TokenType::FOR)) {
+    return ParseForStatement();
+  }
+  if (Match(TokenType::IF)) {
+    return ParseIfStatement();
+  }
   if (Match(TokenType::PRINT)) {
     return ParsePrintStatement();
+  }
+  if (Match(TokenType::WHILE)) {
+    return ParseWhileStatement();
   }
   if (Match(TokenType::LEFT_BRACE)) {
     return std::make_unique<BlockStmt>(ParseBlockStatement());
@@ -116,11 +125,88 @@ auto Parser::ParseStatement() -> StmtPtr {
   return ParseExpressionStatement();
 }
 
+auto Parser::ParseForStatement() -> StmtPtr {
+  Consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+  std::optional<StmtPtr> initializer_stmt;
+  if (Match(TokenType::SEMICOLON)) {
+    // Do nothing.
+  } else if (Match(TokenType::VAR)) {
+    initializer_stmt = ParseVarDeclaration();
+  } else {
+    initializer_stmt = ParseExpressionStatement();
+  }
+
+  std::optional<ExprPtr> condition_expr;
+  if (!Check(TokenType::SEMICOLON)) {
+    condition_expr = ParseExpression();
+  }
+  Consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+  std::optional<ExprPtr> increment_expr;
+  if (!Check(TokenType::RIGHT_PAREN)) {
+    increment_expr = ParseExpression();
+  }
+  Consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+  StmtPtr body = ParseStatement();
+
+  using std::make_unique, std::move;
+
+  if (increment_expr) {
+    std::vector<StmtPtr> statements;
+    statements.reserve(2);
+    statements.emplace_back(move(body));
+    statements.emplace_back(
+        make_unique<ExprStmt>(move(increment_expr.value())));
+    body = make_unique<BlockStmt>(move(statements));
+  }
+
+  if (!condition_expr) {
+    condition_expr = make_unique<LiteralExpr>(Object{true});
+  }
+  body = make_unique<WhileStmt>(move(condition_expr.value()), move(body));
+
+  if (initializer_stmt) {
+    std::vector<StmtPtr> statements;
+    statements.reserve(2);
+    statements.emplace_back(move(initializer_stmt.value()));
+    statements.emplace_back(move(body));
+    body = make_unique<BlockStmt>(move(statements));
+  }
+
+  return body;
+}
+
+auto Parser::ParseIfStatement() -> StmtPtr {
+  Consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+  ExprPtr condition = ParseExpression();
+  Consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+
+  StmtPtr then_branch = ParseStatement();
+  std::optional<StmtPtr> else_branch;
+  if (Match(TokenType::ELSE)) {
+    else_branch = ParseStatement();
+  }
+
+  return std::make_unique<IfStmt>(std::move(condition), std::move(then_branch),
+                                  std::move(else_branch));
+}
+
 auto Parser::ParsePrintStatement() -> StmtPtr {
   ExprPtr value = ParseExpression();
   Consume(TokenType::SEMICOLON, "Expect ';' after value.");
 
   return std::make_unique<PrintStmt>(std::move(value));
+}
+
+auto Parser::ParseWhileStatement() -> StmtPtr {
+  Consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+  ExprPtr condition = ParseExpression();
+  Consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+  StmtPtr body = ParseStatement();
+
+  return std::make_unique<WhileStmt>(std::move(condition), std::move(body));
 }
 
 auto Parser::ParseExpressionStatement() -> StmtPtr {
@@ -146,7 +232,7 @@ auto Parser::ParseExpression() -> ExprPtr {
 }
 
 auto Parser::ParseAssignment() -> ExprPtr {
-  ExprPtr expr = ParseEquality();
+  ExprPtr expr = ParseOr();
 
   if (Match(TokenType::EQUAL)) {
     Token equals = Previous();
@@ -159,6 +245,32 @@ auto Parser::ParseAssignment() -> ExprPtr {
     }
 
     throw Error(equals, "Invalid assignment target.");
+  }
+
+  return expr;
+}
+
+auto Parser::ParseOr() -> ExprPtr {
+  ExprPtr expr = ParseAnd();
+
+  while (Match(TokenType::OR)) {
+    Token op = Previous();
+    ExprPtr right = ParseAnd();
+    expr = std::make_unique<LogicalExpr>(std::move(expr), std::move(op),
+                                         std::move(right));
+  }
+
+  return expr;
+}
+
+auto Parser::ParseAnd() -> ExprPtr {
+  ExprPtr expr = ParseEquality();
+
+  while (Match(TokenType::AND)) {
+    Token op = Previous();
+    ExprPtr right = ParseEquality();
+    expr = std::make_unique<LogicalExpr>(std::move(expr), std::move(op),
+                                         std::move(right));
   }
 
   return expr;

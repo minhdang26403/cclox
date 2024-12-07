@@ -71,7 +71,13 @@ class Parser {
 
   auto ParseStatement() -> StmtPtr;
 
+  auto ParseForStatement() -> StmtPtr;
+
+  auto ParseIfStatement() -> StmtPtr;
+
   auto ParsePrintStatement() -> StmtPtr;
+
+  auto ParseWhileStatement() -> StmtPtr;
 
   auto ParseExpressionStatement() -> StmtPtr;
 
@@ -86,6 +92,10 @@ class Parser {
   auto ParseExpression() -> ExprPtr;
 
   auto ParseAssignment() -> ExprPtr;
+
+  auto ParseOr() -> ExprPtr;
+
+  auto ParseAnd() -> ExprPtr;
 
   /**
    * @brief Parses an equality expression. Parses expressions involving equality

@@ -12,6 +12,7 @@ class AssignExpr;
 class BinaryExpr;
 class GroupingExpr;
 class LiteralExpr;
+class LogicalExpr;
 class UnaryExpr;
 class VariableExpr;
 
@@ -21,11 +22,13 @@ using AssignExprPtr = std::unique_ptr<AssignExpr>;
 using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
 using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
 using LiteralExprPtr = std::unique_ptr<LiteralExpr>;
+using LogicalExprPtr = std::unique_ptr<LogicalExpr>;
 using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
 using VariableExprPtr = std::unique_ptr<VariableExpr>;
 
-using ExprPtr = std::variant<AssignExprPtr, BinaryExprPtr, GroupingExprPtr,
-                             LiteralExprPtr, UnaryExprPtr, VariableExprPtr>;
+using ExprPtr =
+    std::variant<AssignExprPtr, BinaryExprPtr, GroupingExprPtr, LiteralExprPtr,
+                 LogicalExprPtr, UnaryExprPtr, VariableExprPtr>;
 
 class AssignExpr {
  public:
@@ -111,6 +114,23 @@ class LiteralExpr {
 
  private:
   Object value_;
+};
+
+class LogicalExpr {
+ public:
+  LogicalExpr(ExprPtr left, Token op, ExprPtr right)
+      : left_(std::move(left)), op_(std::move(op)), right_(std::move(right)) {}
+
+  auto GetOperator() const noexcept -> const Token& { return op_; }
+
+  auto GetLeftExpr() const noexcept -> const ExprPtr& { return left_; }
+
+  auto GetRightExpr() const noexcept -> const ExprPtr& { return right_; }
+
+ private:
+  ExprPtr left_;
+  Token op_;
+  ExprPtr right_;
 };
 
 class UnaryExpr {
