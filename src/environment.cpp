@@ -28,6 +28,7 @@ auto Environment::Assign(const Token& variable, const Object& value) -> void {
 
   if (enclosing_) {
     enclosing_->Assign(variable, value);
+    return;
   }
 
   throw RuntimeError(variable, "Undefined variable '" + variable_name + "'.");
