@@ -1,6 +1,7 @@
 #include "parser.h"
 
 #include <initializer_list>
+#include <memory>
 #include <variant>
 
 #include "expr.h"
@@ -81,6 +82,9 @@ auto Parser::Parse() -> std::vector<StmtPtr> {
 
 auto Parser::ParseDeclaration() -> StmtPtr {
   try {
+    if (Match(TokenType::FUN)) {
+      return ParseFunction("function");
+    }
     if (Match(TokenType::VAR)) {
       return ParseVarDeclaration();
     }
@@ -90,6 +94,32 @@ auto Parser::ParseDeclaration() -> StmtPtr {
     Synchronize();
     return StmtPtr{};
   }
+}
+
+auto Parser::ParseFunction(std::string_view kind) -> StmtPtr {
+  using enum TokenType;
+  // Parse function name.
+  Token name = Consume(IDENTIFIER, std::format("Expect {} name.", kind));
+  Consume(LEFT_PAREN, std::format("Expect '(' after {} name.", kind));
+
+  // Parse function parameters.
+  std::vector<Token> parameters;
+  if (!Check(RIGHT_PAREN)) {
+    do {
+      if (parameters.size() >= 255) {
+        Lox::Error(output_, Peek(), "Can't have more than 255 parameters.");
+      }
+      parameters.emplace_back(Consume(IDENTIFIER, "Expect parameter name."));
+    } while (Match(COMMA));
+  }
+  Consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+  // Parse function body.
+  Consume(LEFT_BRACE, std::format("Expect '{{' before {} body.", kind));
+  std::vector<StmtPtr> body = ParseBlockStatement();
+
+  return std::make_unique<FunctionStmt>(std::move(name), std::move(parameters),
+                                        std::move(body));
 }
 
 auto Parser::ParseVarDeclaration() -> StmtPtr {
@@ -106,19 +136,23 @@ auto Parser::ParseVarDeclaration() -> StmtPtr {
 }
 
 auto Parser::ParseStatement() -> StmtPtr {
-  if (Match(TokenType::FOR)) {
+  using enum TokenType;
+  if (Match(FOR)) {
     return ParseForStatement();
   }
-  if (Match(TokenType::IF)) {
+  if (Match(IF)) {
     return ParseIfStatement();
   }
-  if (Match(TokenType::PRINT)) {
+  if (Match(PRINT)) {
     return ParsePrintStatement();
   }
-  if (Match(TokenType::WHILE)) {
+  if (Match(RETURN)) {
+    return ParseReturnStatement();
+  }
+  if (Match(WHILE)) {
     return ParseWhileStatement();
   }
-  if (Match(TokenType::LEFT_BRACE)) {
+  if (Match(LEFT_BRACE)) {
     return std::make_unique<BlockStmt>(ParseBlockStatement());
   }
 
@@ -198,6 +232,18 @@ auto Parser::ParsePrintStatement() -> StmtPtr {
   Consume(TokenType::SEMICOLON, "Expect ';' after value.");
 
   return std::make_unique<PrintStmt>(std::move(value));
+}
+
+auto Parser::ParseReturnStatement() -> StmtPtr {
+  Token keyword = Previous();
+
+  std::optional<ExprPtr> value;
+  if (!Check(TokenType::SEMICOLON)) {
+    value = ParseExpression();
+  }
+  Consume(TokenType::SEMICOLON, "Expect ';' after return value.");
+
+  return std::make_unique<ReturnStmt>(std::move(keyword), std::move(value));
 }
 
 auto Parser::ParseWhileStatement() -> StmtPtr {
@@ -340,35 +386,50 @@ auto Parser::ParseUnary() -> ExprPtr {
     return std::make_unique<UnaryExpr>(std::move(op), std::move(right));
   }
 
-  return ParsePrimary();
+  return ParseCall();
+}
+
+auto Parser::ParseCall() -> ExprPtr {
+  ExprPtr expr = ParsePrimary();
+
+  while (true) {
+    if (Match(TokenType::LEFT_PAREN)) {
+      expr = FinishCall(std::move(expr));
+    } else {
+      break;
+    }
+  }
+
+  return expr;
 }
 
 auto Parser::ParsePrimary() -> ExprPtr {
   using enum TokenType;
+  using std::make_unique;
   if (Match(FALSE)) {
-    return std::make_unique<LiteralExpr>(Object{false});
+    return make_unique<LiteralExpr>(Object{false});
   }
 
   if (Match(TRUE)) {
-    return std::make_unique<LiteralExpr>(Object{true});
+    return make_unique<LiteralExpr>(Object{true});
   }
 
   if (Match(NIL)) {
-    return std::make_unique<LiteralExpr>(Object{nullptr});
+    return make_unique<LiteralExpr>(Object{nullptr});
   }
 
   if (Match(NUMBER, STRING)) {
-    return std::make_unique<LiteralExpr>(Previous().GetLiteral());
+    return make_unique<LiteralExpr>(Previous().GetLiteral());
   }
 
   if (Match(IDENTIFIER)) {
-    return std::make_unique<VariableExpr>(Previous());
+    return make_unique<VariableExpr>(Previous());
   }
 
   if (Match(LEFT_PAREN)) {
     ExprPtr expr = ParseExpression();
     Consume(RIGHT_PAREN, "Expect ')' after expression.");
-    return std::make_unique<GroupingExpr>(std::move(expr));
+    return make_unique<GroupingExpr>(std::move(expr));
   }
 
   throw Error(Peek(), "Expect expression.");
@@ -451,6 +512,24 @@ auto Parser::Synchronize() noexcept -> void {
 
     Advance();
   }
+}
+
+auto Parser::FinishCall(ExprPtr callee) -> ExprPtr {
+  std::vector<ExprPtr> arguments;
+
+  if (!Check(TokenType::RIGHT_PAREN)) {
+    do {
+      if (arguments.size() >= 255) {
+        Lox::Error(output_, Peek(), "Can't have more than 255 arguments.");
+      }
+      arguments.emplace_back(ParseExpression());
+    } while (Match(TokenType::COMMA));
+  }
+
+  Token paren = Consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.");
+
+  return std::make_unique<CallExpr>(std::move(callee), std::move(paren),
+                                    std::move(arguments));
 }
 
 }  // namespace cclox

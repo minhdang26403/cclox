@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "token.h"
 
@@ -10,6 +11,7 @@ namespace cclox {
 // Forward declaration.
 class AssignExpr;
 class BinaryExpr;
+class CallExpr;
 class GroupingExpr;
 class LiteralExpr;
 class LogicalExpr;
@@ -20,6 +22,7 @@ class VariableExpr;
 // object
 using AssignExprPtr = std::unique_ptr<AssignExpr>;
 using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
+using CallExprPtr = std::unique_ptr<CallExpr>;
 using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
 using LiteralExprPtr = std::unique_ptr<LiteralExpr>;
 using LogicalExprPtr = std::unique_ptr<LogicalExpr>;
@@ -27,8 +30,8 @@ using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
 using VariableExprPtr = std::unique_ptr<VariableExpr>;
 
 using ExprPtr =
-    std::variant<AssignExprPtr, BinaryExprPtr, GroupingExprPtr, LiteralExprPtr,
-                 LogicalExprPtr, UnaryExprPtr, VariableExprPtr>;
+    std::variant<AssignExprPtr, BinaryExprPtr, CallExprPtr, GroupingExprPtr,
+                 LiteralExprPtr, LogicalExprPtr, UnaryExprPtr, VariableExprPtr>;
 
 class AssignExpr {
  public:
@@ -77,6 +80,27 @@ class BinaryExpr {
   ExprPtr left_;
   Token op_;
   ExprPtr right_;
+};
+
+class CallExpr {
+ public:
+  CallExpr(ExprPtr callee, Token paren, std::vector<ExprPtr> arguments)
+      : callee_(std::move(callee)),
+        paren_(std::move(paren)),
+        arguments_(std::move(arguments)) {}
+
+  auto GetCallee() const noexcept -> const ExprPtr& { return callee_; }
+
+  auto GetParen() const noexcept -> const Token& { return paren_; }
+
+  auto GetArguments() const noexcept -> const std::vector<ExprPtr>& {
+    return arguments_;
+  }
+
+ private:
+  ExprPtr callee_;
+  Token paren_;
+  std::vector<ExprPtr> arguments_;
 };
 
 class GroupingExpr {

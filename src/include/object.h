@@ -2,13 +2,18 @@
 #define OBJECT_H_
 
 #include <cstddef>
+#include <memory>
 #include <optional>
 #include <string>
 #include <type_traits>
-#include <variant>
 #include <utility>
+#include <variant>
 
 namespace cclox {
+
+class LoxCallable;
+using LoxCallablePtr = std::shared_ptr<LoxCallable>;
+
 /**
  * @brief Represents an abstract object that can holds different types of
  * values.
@@ -17,10 +22,10 @@ class Object {
  public:
   /**
    * @brief Defines the type of object, which can be boolean, null pointer,
-   * integer, double, or string.
+   * integer, double, string, Lox function, .
    */
-  using ValueType =
-      std::variant<bool, std::nullptr_t, int32_t, double, std::string>;
+  using ValueType = std::variant<bool, std::nullptr_t, int32_t, double,
+                                 std::string, LoxCallablePtr>;
 
   /**
    * @brief Default constructor. Initializes the Object with the default value
@@ -117,6 +122,8 @@ class Object {
    */
   auto AsString() const noexcept -> std::optional<std::string>;
 
+  auto AsFunction() const noexcept -> std::optional<LoxCallablePtr>;
+
   /**
    * @brief Retrieves the stored value as a specific type.
    * @return The stored value as type `T`.
@@ -124,7 +131,7 @@ class Object {
    * `T`.
    */
   template<typename T>
-  auto Get() const -> T {
+  auto Get() const -> const T& {
     return std::get<T>(value_);
   }
 

@@ -2,6 +2,7 @@
 add_library(lox
   environment.cpp
   lox.cpp
+  lox_function.cpp
   interpreter.cpp
   object.cpp
   parser.cpp

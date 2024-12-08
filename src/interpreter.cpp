@@ -8,10 +8,13 @@
 #include "environment.h"
 #include "expr.h"
 #include "lox.h"
+#include "lox_callable.h"
+#include "lox_function.h"
 #include "object.h"
 #include "stmt.h"
 #include "token.h"
 #include "token_type.h"
+#include "return.h"
 
 namespace cclox {
 auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
@@ -44,7 +47,10 @@ auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
   EvaluateExpression(stmt->GetExpression());
 }
 
-auto Interpreter::operator()(const FunctionStmtPtr&) -> void {}
+auto Interpreter::operator()(const FunctionStmtPtr& stmt) -> void {
+  auto function = std::make_shared<LoxFunction>(stmt, environment_);
+  environment_->Define(stmt->GetName().GetLexeme(), Object{function});
+}
 
 auto Interpreter::operator()(const IfStmtPtr& stmt) -> void {
   Object result = EvaluateExpression(stmt->GetCondition());
@@ -62,7 +68,15 @@ auto Interpreter::operator()(const PrintStmtPtr& stmt) -> void {
   output_ << value.ToString() << '\n';
 }
 
-auto Interpreter::operator()(const ReturnStmtPtr&) -> void {}
+auto Interpreter::operator()(const ReturnStmtPtr& stmt) -> void {
+  std::optional<Object> value;
+  const std::optional<ExprPtr>& value_expr_opt = stmt->GetValue();
+  if (value_expr_opt) {
+    value = EvaluateExpression(value_expr_opt.value());
+  }
+
+  throw Return(std::move(value));
+}
 
 auto Interpreter::operator()(const VarStmtPtr& stmt) -> void {
   assert(stmt);
@@ -149,6 +163,33 @@ auto Interpreter::operator()(const BinaryExprPtr& expr) -> Object {
 
   // Unreachable
   assert(false);
+}
+
+auto Interpreter::operator()(const CallExprPtr& expr) -> Object {
+  Object callee = EvaluateExpression(expr->GetCallee());
+
+  std::vector<Object> arguments;
+  arguments.reserve(expr->GetArguments().size());
+  for (const auto& argument : expr->GetArguments()) {
+    arguments.emplace_back(EvaluateExpression(argument));
+  }
+
+  std::optional<LoxCallablePtr> function_opt = callee.AsFunction();
+  if (!function_opt) {
+    throw RuntimeError(expr->GetParen(),
+                       "Can only call functions and classes.");
+  }
+
+  const LoxCallablePtr& function = function_opt.value();
+  if (arguments.size() != function->Arity()) {
+    throw RuntimeError(expr->GetParen(),
+                       std::format("Expected {} arguments but got {}.",
+                                   function->Arity(), arguments.size()));
+  }
+
+  // TODO(Dang): implement later after implement Function Object
+
+  return function->Call(*this, arguments);
 }
 
 auto Interpreter::operator()(const GroupingExprPtr& expr) -> Object {

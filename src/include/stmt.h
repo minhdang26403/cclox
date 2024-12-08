@@ -2,6 +2,7 @@
 #define STMT_H_
 
 #include <memory>
+#include <optional>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -58,7 +59,26 @@ class ExprStmt {
   ExprPtr expression_;
 };
 
-class FunctionStmt {};
+class FunctionStmt {
+ public:
+  FunctionStmt(Token name, std::vector<Token> params, std::vector<StmtPtr> body)
+      : name_(std::move(name)),
+        params_(std::move(params)),
+        body_(std::move(body)) {}
+
+  auto GetName() const noexcept -> const Token& { return name_; }
+
+  auto GetParams() const noexcept -> const std::vector<Token>& {
+    return params_;
+  }
+
+  auto GetBody() const noexcept -> const std::vector<StmtPtr>& { return body_; }
+
+ private:
+  Token name_;
+  std::vector<Token> params_;
+  std::vector<StmtPtr> body_;
+};
 
 class IfStmt {
  public:
@@ -72,7 +92,9 @@ class IfStmt {
 
   auto GetThenBranch() const noexcept -> const StmtPtr& { return then_branch_; }
 
-  auto GetElseBranch() const noexcept -> const std::optional<StmtPtr>& { return else_branch_; }
+  auto GetElseBranch() const noexcept -> const std::optional<StmtPtr>& {
+    return else_branch_;
+  }
 
  private:
   ExprPtr condition_;
@@ -90,7 +112,21 @@ class PrintStmt {
   ExprPtr expression_;
 };
 
-class ReturnStmt {};
+class ReturnStmt {
+ public:
+  ReturnStmt(Token keyword, std::optional<ExprPtr> value)
+      : keyword_(std::move(keyword)), value_(std::move(value)) {}
+
+  auto GetKeyword() const noexcept -> const Token& { return keyword_; }
+
+  auto GetValue() const noexcept -> const std::optional<ExprPtr>& {
+    return value_;
+  }
+
+ private:
+  Token keyword_;
+  std::optional<ExprPtr> value_;
+};
 
 class VarStmt {
  public:

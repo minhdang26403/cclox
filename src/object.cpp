@@ -33,6 +33,13 @@ auto Object::AsString() const noexcept -> std::optional<std::string> {
   return std::nullopt;
 }
 
+auto Object::AsFunction() const noexcept -> std::optional<LoxCallablePtr> {
+  if (auto pval = std::get_if<LoxCallablePtr>(&value_)) {
+    return *pval;
+  }
+  return std::nullopt;
+}
+
 auto Object::IsTruthy() const noexcept -> bool {
   return std::visit(
       [](auto&& v) -> bool {
@@ -47,6 +54,8 @@ auto Object::IsTruthy() const noexcept -> bool {
           return v != 0.0;
         } else if constexpr (std::is_same_v<T, std::string>) {
           return !v.empty();
+        } else if constexpr (std::is_same_v<T, LoxCallablePtr>) {
+          return v != nullptr;
         }
       },
       value_);

@@ -19,8 +19,8 @@ class Environment {
    * environment.
    * @param enclosing The enclosing environment.
    */
-  explicit Environment(std::shared_ptr<Environment> enclosing)
-      : enclosing_(std::move(enclosing)) {}
+  explicit Environment(const std::shared_ptr<Environment>& enclosing)
+      : enclosing_(enclosing) {}
 
   auto Get(const Token& variable) const -> Object;
 

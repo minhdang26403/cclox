@@ -87,6 +87,8 @@ class Interpreter {
    */
   auto operator()(const BinaryExprPtr& expr) -> Object;
 
+  auto operator()(const CallExprPtr& expr) -> Object;
+
   /**
    * @brief Evaluates a grouping expression (expressions in parentheses).
    * @param expr The grouping expression to evaluate.
@@ -193,7 +195,8 @@ class Interpreter {
       -> std::pair<double, double>;
 
   // The environment that stores variables' values.
-  std::shared_ptr<Environment> environment_{std::make_shared<Environment>()};
+  const std::shared_ptr<Environment> globals_{std::make_shared<Environment>()};
+  std::shared_ptr<Environment> environment_{globals_};
   std::ostream& output_{std::cout};
 };
 }  // namespace cclox
