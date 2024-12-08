@@ -1,5 +1,6 @@
 # Define the library
 add_library(lox
+  ast_printer.cpp
   environment.cpp
   lox.cpp
   lox_function.cpp
