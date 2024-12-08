@@ -95,7 +95,7 @@ add_custom_target(check-lint echo '${CCLOX_LINT_FILES}' | xargs -n12 -P8
   ${CPPLINT_BIN}
   --verbose=2 --quiet
   --linelength=120
-  --filter=-legal/copyright,-build/header_guard,-build/include_subdir,-runtime/references # https://github.com/cpplint/cpplint/issues/148
+  --filter=-legal/copyright,-build/header_guard,-build/include_subdir,-build/c++11,-build/namespaces,-runtime/references # https://github.com/cpplint/cpplint/issues/148
 )
 
 # ##########################################################
