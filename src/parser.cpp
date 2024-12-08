@@ -160,28 +160,29 @@ auto Parser::ParseStatement() -> StmtPtr {
 }
 
 auto Parser::ParseForStatement() -> StmtPtr {
-  Consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+  using enum TokenType;
+  Consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
   std::optional<StmtPtr> initializer_stmt;
-  if (Match(TokenType::SEMICOLON)) {
+  if (Match(SEMICOLON)) {
     // Do nothing.
-  } else if (Match(TokenType::VAR)) {
+  } else if (Match(VAR)) {
     initializer_stmt = ParseVarDeclaration();
   } else {
     initializer_stmt = ParseExpressionStatement();
   }
 
   std::optional<ExprPtr> condition_expr;
-  if (!Check(TokenType::SEMICOLON)) {
+  if (!Check(SEMICOLON)) {
     condition_expr = ParseExpression();
   }
-  Consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+  Consume(SEMICOLON, "Expect ';' after loop condition.");
 
   std::optional<ExprPtr> increment_expr;
-  if (!Check(TokenType::RIGHT_PAREN)) {
+  if (!Check(RIGHT_PAREN)) {
     increment_expr = ParseExpression();
   }
-  Consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+  Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
   StmtPtr body = ParseStatement();
 

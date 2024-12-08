@@ -98,21 +98,22 @@ auto Interpreter::operator()(const WhileStmtPtr& stmt) -> void {
 auto Interpreter::ExecuteBlockStatement(
     const std::vector<StmtPtr>& statements,
     std::shared_ptr<Environment> environment) -> void {
-  std::shared_ptr<Environment> previous = std::move(environment_);
+  using std::move;
+  std::shared_ptr<Environment> previous = move(environment_);
   try {
-    environment_ = std::move(environment);
+    environment_ = move(environment);
 
     for (const auto& statement : statements) {
       ExecuteStatement(statement);
     }
   } catch (const RuntimeError& error) {
-    environment_ = std::move(previous);
+    environment_ = move(previous);
     // Rethrow the exception.
     throw;
   }
 
   // Restore the current environment if no exception is thrown.
-  environment_ = std::move(previous);
+  environment_ = move(previous);
 }
 
 // ====================Methods to handle expressions====================
