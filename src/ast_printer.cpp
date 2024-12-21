@@ -1,4 +1,5 @@
 #include "ast_printer.h"
+#include <format>
 
 namespace cclox {
 // ====================AST Printer for Statements====================
@@ -91,8 +92,8 @@ auto ASTPrinter::operator()(const AssignExprPtr& expr) const -> std::string {
 }
 
 auto ASTPrinter::operator()(const BinaryExprPtr& expr) const -> std::string {
-  return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpr(),
-                      expr->GetRightExpr());
+  return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpression(),
+                      expr->GetRightExpression());
 }
 
 auto ASTPrinter::operator()(const CallExprPtr& expr) const -> std::string {
@@ -115,8 +116,8 @@ auto ASTPrinter::operator()(const LiteralExprPtr& expr) const -> std::string {
 }
 
 auto ASTPrinter::operator()(const LogicalExprPtr& expr) const -> std::string {
-  return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpr(),
-                      expr->GetRightExpr());
+  return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpression(),
+                      expr->GetRightExpression());
 }
 
 auto ASTPrinter::operator()(const UnaryExprPtr& expr) const -> std::string {
