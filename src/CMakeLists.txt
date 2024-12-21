@@ -7,6 +7,7 @@ add_library(lox
   interpreter.cpp
   object.cpp
   parser.cpp
+  resolver.cpp
   scanner.cpp
   token.cpp)
 
