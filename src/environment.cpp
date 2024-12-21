@@ -15,6 +15,10 @@ auto Environment::Get(const Token& variable) const -> Object {
   throw RuntimeError{variable, "Undefined variable '" + variable_name + "'."};
 }
 
+auto Environment::GetAt(uint64_t distance, const Token& name) -> Object {
+  return Ancestor(distance)->Get(name);
+}
+
 auto Environment::Define(const std::string& name, const Object& value) -> void {
   values_[name] = value;
 }
@@ -32,5 +36,24 @@ auto Environment::Assign(const Token& variable, const Object& value) -> void {
   }
 
   throw RuntimeError(variable, "Undefined variable '" + variable_name + "'.");
+}
+
+auto Environment::AssignAt(uint64_t distance, const Token& variable,
+                           const Object& value) -> void {
+  Ancestor(distance)->Assign(variable, value);
+}
+
+auto Environment::GetEnclosingEnvironment() const noexcept
+    -> const std::shared_ptr<Environment>& {
+  return enclosing_;
+}
+
+auto Environment::Ancestor(uint64_t distance) -> std::shared_ptr<Environment> {
+  std::shared_ptr<Environment> environment = shared_from_this();
+  for (uint32_t i = 0; i < distance; i++) {
+    environment = environment->GetEnclosingEnvironment();
+  }
+
+  return environment;
 }
 }  // namespace cclox

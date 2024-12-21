@@ -20,14 +20,14 @@ class VariableExpr;
 
 // Use pointers to remove cyclic dependencies between these objects and `Expr`
 // object
-using AssignExprPtr = std::unique_ptr<AssignExpr>;
-using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
-using CallExprPtr = std::unique_ptr<CallExpr>;
-using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
-using LiteralExprPtr = std::unique_ptr<LiteralExpr>;
-using LogicalExprPtr = std::unique_ptr<LogicalExpr>;
-using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
-using VariableExprPtr = std::unique_ptr<VariableExpr>;
+using AssignExprPtr = std::shared_ptr<AssignExpr>;
+using BinaryExprPtr = std::shared_ptr<BinaryExpr>;
+using CallExprPtr = std::shared_ptr<CallExpr>;
+using GroupingExprPtr = std::shared_ptr<GroupingExpr>;
+using LiteralExprPtr = std::shared_ptr<LiteralExpr>;
+using LogicalExprPtr = std::shared_ptr<LogicalExpr>;
+using UnaryExprPtr = std::shared_ptr<UnaryExpr>;
+using VariableExprPtr = std::shared_ptr<VariableExpr>;
 
 using ExprPtr =
     std::variant<AssignExprPtr, BinaryExprPtr, CallExprPtr, GroupingExprPtr,
@@ -68,13 +68,13 @@ class BinaryExpr {
    * @brief Gets the left expression of the binary expression.
    * @return a const reference to the left expression object.
    */
-  auto GetLeftExpr() const noexcept -> const ExprPtr& { return left_; }
+  auto GetLeftExpression() const noexcept -> const ExprPtr& { return left_; }
 
   /**
    * @brief Gets the right expression of the binary expression.
    * @return a const reference to the right expression object.
    */
-  auto GetRightExpr() const noexcept -> const ExprPtr& { return right_; }
+  auto GetRightExpression() const noexcept -> const ExprPtr& { return right_; }
 
  private:
   ExprPtr left_;
@@ -147,9 +147,9 @@ class LogicalExpr {
 
   auto GetOperator() const noexcept -> const Token& { return op_; }
 
-  auto GetLeftExpr() const noexcept -> const ExprPtr& { return left_; }
+  auto GetLeftExpression() const noexcept -> const ExprPtr& { return left_; }
 
-  auto GetRightExpr() const noexcept -> const ExprPtr& { return right_; }
+  auto GetRightExpression() const noexcept -> const ExprPtr& { return right_; }
 
  private:
   ExprPtr left_;

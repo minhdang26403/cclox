@@ -3,7 +3,9 @@
 
 #include <format>
 #include <memory>
+#include <ostream>
 #include <stdexcept>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -45,6 +47,10 @@ class Interpreter {
    * @param expr The expression to interpret.
    */
   auto Interpret(const std::vector<StmtPtr>& statements) -> void;
+
+  auto ResolveVariable(const ExprPtr& expr, uint64_t depth) -> void;
+
+  auto GetOutputStream() const -> std::ostream&;
 
   // ====================Methods to handle statement====================
   auto ExecuteStatement(const StmtPtr& stmt) -> void;
@@ -194,9 +200,12 @@ class Interpreter {
                          const Object& right) const
       -> std::pair<double, double>;
 
+  auto LookUpVariable(const Token& variable, const ExprPtr& expr) -> Object;
+
   // The environment that stores variables' values.
   const std::shared_ptr<Environment> globals_{std::make_shared<Environment>()};
   std::shared_ptr<Environment> environment_{globals_};
+  std::unordered_map<ExprPtr, size_t> locals_;
   std::ostream& output_{std::cout};
 };
 }  // namespace cclox

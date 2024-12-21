@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <ostream>
 #include <stdexcept>
 #include <variant>
 
@@ -11,10 +12,10 @@
 #include "lox_callable.h"
 #include "lox_function.h"
 #include "object.h"
+#include "return.h"
 #include "stmt.h"
 #include "token.h"
 #include "token_type.h"
-#include "return.h"
 
 namespace cclox {
 auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
@@ -25,6 +26,14 @@ auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
   } catch (const RuntimeError& error) {
     Lox::ReportRuntimeError(output_, error);
   }
+}
+
+auto Interpreter::ResolveVariable(const ExprPtr& expr, uint64_t depth) -> void {
+  locals_[expr] = depth;
+}
+
+auto Interpreter::GetOutputStream() const -> std::ostream& {
+  return output_;
 }
 
 // ====================Methods to handle statement====================
@@ -124,15 +133,20 @@ auto Interpreter::EvaluateExpression(const ExprPtr& expr) -> Object {
 auto Interpreter::operator()(const AssignExprPtr& expr) -> Object {
   assert(expr);
   Object value = EvaluateExpression(expr->GetValue());
-  environment_->Assign(expr->GetVariable(), value);
+
+  if (locals_.contains(expr)) {
+    environment_->AssignAt(locals_.at(expr), expr->GetVariable(), value);
+  } else {
+    globals_->Assign(expr->GetVariable(), value);
+  }
 
   return value;
 }
 
 auto Interpreter::operator()(const BinaryExprPtr& expr) -> Object {
   assert(expr);
-  Object left = EvaluateExpression(expr->GetLeftExpr());
-  Object right = EvaluateExpression(expr->GetRightExpr());
+  Object left = EvaluateExpression(expr->GetLeftExpression());
+  Object right = EvaluateExpression(expr->GetRightExpression());
 
   using enum TokenType;
   const Token& op = expr->GetOperator();
@@ -205,7 +219,7 @@ auto Interpreter::operator()(const LiteralExprPtr& expr) -> Object {
 
 auto Interpreter::operator()(const LogicalExprPtr& expr) -> Object {
   assert(expr);
-  Object left = EvaluateExpression(expr->GetLeftExpr());
+  Object left = EvaluateExpression(expr->GetLeftExpression());
 
   if (expr->GetOperator().GetType() == TokenType::OR) {
     if (left.IsTruthy()) {
@@ -217,7 +231,7 @@ auto Interpreter::operator()(const LogicalExprPtr& expr) -> Object {
     }
   }
 
-  return EvaluateExpression(expr->GetRightExpr());
+  return EvaluateExpression(expr->GetRightExpression());
 }
 
 auto Interpreter::operator()(const UnaryExprPtr& expr) -> Object {
@@ -242,7 +256,7 @@ auto Interpreter::operator()(const UnaryExprPtr& expr) -> Object {
 
 auto Interpreter::operator()(const VariableExprPtr& expr) -> Object {
   assert(expr);
-  return environment_->Get(expr->GetVariable());
+  return LookUpVariable(expr->GetVariable(), expr);
 }
 
 // ====================Private method implementations====================
@@ -348,6 +362,15 @@ auto Interpreter::GetNumberOperands(const Object& left, const Token& op,
   }
 
   return std::pair{left_num.value(), right_num.value()};
+}
+
+auto Interpreter::LookUpVariable(const Token& variable, const ExprPtr& expr)
+    -> Object {
+  if (locals_.contains(expr)) {
+    return environment_->GetAt(locals_.at(expr), variable);
+  } else {
+    return globals_->Get(variable);
+  }
 }
 
 }  // namespace cclox

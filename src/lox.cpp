@@ -9,6 +9,7 @@
 #include "ast_printer.h"
 #include "interpreter.h"
 #include "parser.h"
+#include "resolver.h"
 #include "scanner.h"
 #include "stmt.h"
 #include "token_type.h"
@@ -102,6 +103,14 @@ auto Lox::Run(std::string source) -> void {
   Parser parser{std::move(tokens), output_};
   std::vector<StmtPtr> statements = parser.Parse();
   // Stop if there was a parsing error.
+  if (had_error) {
+    return;
+  }
+
+  Resolver resolver{interpreter_};
+  resolver.ResolveStatements(statements);
+
+  // Stop if there was a resolution error.
   if (had_error) {
     return;
   }
