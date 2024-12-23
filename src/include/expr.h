@@ -144,7 +144,7 @@ class GroupingExpr {
    * @brief Gets the expression being grouped.
    * @return a const reference to the inner expression object.
    */
-  auto GetExpr() const noexcept -> const ExprPtr& { return expression_; }
+  auto GetExpression() const noexcept -> const ExprPtr& { return expression_; }
 
  private:
   ExprPtr expression_;

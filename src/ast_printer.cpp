@@ -114,7 +114,7 @@ auto ASTPrinter::operator()(const GetExprPtr& expr) const -> std::string {
 }
 
 auto ASTPrinter::operator()(const GroupingExprPtr& expr) const -> std::string {
-  return Parenthesize("group", expr->GetExpr());
+  return Parenthesize("group", expr->GetExpression());
 }
 
 auto ASTPrinter::operator()(const LiteralExprPtr& expr) const -> std::string {

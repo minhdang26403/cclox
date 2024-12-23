@@ -236,7 +236,7 @@ auto Interpreter::operator()(const GetExprPtr& expr) -> Object {
 
 auto Interpreter::operator()(const GroupingExprPtr& expr) -> Object {
   assert(expr);
-  return EvaluateExpression(expr->GetExpr());
+  return EvaluateExpression(expr->GetExpression());
 }
 
 auto Interpreter::operator()(const LiteralExprPtr& expr) -> Object {

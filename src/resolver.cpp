@@ -129,7 +129,7 @@ auto Resolver::operator()(const GetExprPtr& expr) -> void {
 }
 
 auto Resolver::operator()(const GroupingExprPtr& expr) -> void {
-  ResolveExpression(expr->GetExpr());
+  ResolveExpression(expr->GetExpression());
 }
 
 auto Resolver::operator()([[maybe_unused]] const LiteralExprPtr& expr) -> void {
