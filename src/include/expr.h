@@ -206,7 +206,7 @@ class SetExpr {
 
 class ThisExpr {
  public:
-  ThisExpr(Token keyword) : keyword_(std::move(keyword)) {}
+  explicit ThisExpr(Token keyword) : keyword_(std::move(keyword)) {}
 
   auto GetKeyword() const noexcept -> const Token& { return keyword_; }
 

@@ -1,6 +1,12 @@
 #ifndef LOX_CLASS_H_
 #define LOX_CLASS_H_
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "lox_callable.h"
 #include "object.h"
 

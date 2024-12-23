@@ -11,7 +11,7 @@ class LoxInstance {
  public:
   using FieldMap = std::unordered_map<std::string, Object>;
 
-  LoxInstance(const LoxClass& klass) : klass_(klass) {}
+  explicit LoxInstance(const LoxClass& klass) : klass_(klass) {}
 
   auto GetField(const Token& field) -> Object;
 
