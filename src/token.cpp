@@ -7,11 +7,11 @@ auto Token::GetType() const noexcept -> TokenType {
   return type_;
 }
 
-auto Token::GetLexeme() const noexcept -> std::string {
+auto Token::GetLexeme() const noexcept -> const std::string& {
   return lexeme_;
 }
 
-auto Token::GetLiteral() const -> Object {
+auto Token::GetLiteral() const noexcept -> const Object& {
   return literal_.value();
 }
 

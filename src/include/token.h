@@ -44,13 +44,13 @@ class Token {
    * @brief Gets the lexeme of this token.
    * @return The lexeme.
    */
-  auto GetLexeme() const noexcept -> std::string;
+  auto GetLexeme() const noexcept -> const std::string&;
 
   /**
    * @brief Gets the literal value of this token.
    * @return The literal value.
    */
-  auto GetLiteral() const -> Object;
+  auto GetLiteral() const noexcept -> const Object&;
 
   /**
    * @brief Gets the line number of this token.
