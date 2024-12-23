@@ -67,6 +67,8 @@ class Parser {
  private:
   auto ParseDeclaration() -> StmtPtr;
 
+  auto ParseClassDeclaration() -> StmtPtr;
+
   auto ParseFunction(std::string_view kind) -> StmtPtr;
 
   auto ParseVarDeclaration() -> StmtPtr;

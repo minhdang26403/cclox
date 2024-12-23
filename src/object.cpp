@@ -40,6 +40,13 @@ auto Object::AsFunction() const noexcept -> std::optional<LoxCallablePtr> {
   return std::nullopt;
 }
 
+auto Object::AsLoxInstance() const noexcept -> std::optional<LoxInstancePtr> {
+  if (auto pval = std::get_if<LoxInstancePtr>(&value_)) {
+    return *pval;
+  }
+  return std::nullopt;
+}
+
 auto Object::IsTruthy() const noexcept -> bool {
   return std::visit(
       [](auto&& v) -> bool {
@@ -55,6 +62,8 @@ auto Object::IsTruthy() const noexcept -> bool {
         } else if constexpr (std::is_same_v<T, std::string>) {
           return !v.empty();
         } else if constexpr (std::is_same_v<T, LoxCallablePtr>) {
+          return v != nullptr;
+        } else if constexpr (std::is_same_v<T, LoxInstancePtr>) {
           return v != nullptr;
         }
       },

@@ -42,11 +42,17 @@ class Resolver {
 
   auto operator()(const CallExprPtr& expr) -> void;
 
+  auto operator()(const GetExprPtr& expr) -> void;
+
   auto operator()(const GroupingExprPtr& expr) -> void;
 
   auto operator()(const LiteralExprPtr& expr) -> void;
 
   auto operator()(const LogicalExprPtr& expr) -> void;
+
+  auto operator()(const SetExprPtr& expr) -> void;
+
+  auto operator()(const ThisExprPtr& expr) -> void;
 
   auto operator()(const UnaryExprPtr& expr) -> void;
 
@@ -56,6 +62,13 @@ class Resolver {
   enum class FunctionType {
     NONE,
     FUNCTION,
+    INITIALIZER,
+    METHOD,
+  };
+
+  enum class ClassType {
+    NONE,
+    CLASS,
   };
 
   auto ResolveStatement(const StmtPtr& stmt) -> void;
@@ -78,6 +91,7 @@ class Resolver {
   Interpreter& interpreter_;
   std::vector<std::unordered_map<std::string, bool>> scopes_;
   FunctionType current_function_{FunctionType::NONE};
+  ClassType current_class_{ClassType::NONE};
 };
 }  // namespace cclox
 

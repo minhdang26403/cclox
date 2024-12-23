@@ -11,8 +11,12 @@
 
 namespace cclox {
 
+// Use pointers to remove cyclic dependencies.
 class LoxCallable;
 using LoxCallablePtr = std::shared_ptr<LoxCallable>;
+
+class LoxInstance;
+using LoxInstancePtr = std::shared_ptr<LoxInstance>;
 
 /**
  * @brief Represents an abstract object that can holds different types of
@@ -22,10 +26,10 @@ class Object {
  public:
   /**
    * @brief Defines the type of object, which can be boolean, null pointer,
-   * integer, double, string, Lox function, .
+   * integer, double, string, Lox function, Lox class, and Lox instance.
    */
   using ValueType = std::variant<bool, std::nullptr_t, int32_t, double,
-                                 std::string, LoxCallablePtr>;
+                                 std::string, LoxCallablePtr, LoxInstancePtr>;
 
   /**
    * @brief Default constructor. Initializes the Object with the default value
@@ -123,6 +127,8 @@ class Object {
   auto AsString() const noexcept -> std::optional<std::string>;
 
   auto AsFunction() const noexcept -> std::optional<LoxCallablePtr>;
+
+  auto AsLoxInstance() const noexcept -> std::optional<LoxInstancePtr>;
 
   /**
    * @brief Retrieves the stored value as a specific type.

@@ -1,5 +1,6 @@
 #include "ast_printer.h"
 #include <format>
+#include "expr.h"
 
 namespace cclox {
 // ====================AST Printer for Statements====================
@@ -28,7 +29,7 @@ auto ASTPrinter::operator()(const ExprStmtPtr& stmt) const -> std::string {
 }
 
 auto ASTPrinter::operator()(const FunctionStmtPtr& stmt) const -> std::string {
-  std::string s = std::format("(fun {}(", stmt->GetName().GetLexeme());
+  std::string s = std::format("(fun {}(", stmt->GetFunctionName().GetLexeme());
 
   for (const auto& param : stmt->GetParams()) {
     s.append(param.GetLexeme());
@@ -92,8 +93,8 @@ auto ASTPrinter::operator()(const AssignExprPtr& expr) const -> std::string {
 }
 
 auto ASTPrinter::operator()(const BinaryExprPtr& expr) const -> std::string {
-  return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpression(),
-                      expr->GetRightExpression());
+  return Parenthesize(expr->GetOperator().GetLexeme(),
+                      expr->GetLeftExpression(), expr->GetRightExpression());
 }
 
 auto ASTPrinter::operator()(const CallExprPtr& expr) const -> std::string {
@@ -107,6 +108,11 @@ auto ASTPrinter::operator()(const CallExprPtr& expr) const -> std::string {
   return s;
 }
 
+auto ASTPrinter::operator()(const GetExprPtr& expr) const -> std::string {
+  return std::format("(. {} {})", Print(expr->GetObject()),
+                     expr->GetProperty().GetLexeme());
+}
+
 auto ASTPrinter::operator()(const GroupingExprPtr& expr) const -> std::string {
   return Parenthesize("group", expr->GetExpr());
 }
@@ -116,8 +122,18 @@ auto ASTPrinter::operator()(const LiteralExprPtr& expr) const -> std::string {
 }
 
 auto ASTPrinter::operator()(const LogicalExprPtr& expr) const -> std::string {
-  return Parenthesize(expr->GetOperator().GetLexeme(), expr->GetLeftExpression(),
-                      expr->GetRightExpression());
+  return Parenthesize(expr->GetOperator().GetLexeme(),
+                      expr->GetLeftExpression(), expr->GetRightExpression());
+}
+
+auto ASTPrinter::operator()(const SetExprPtr& expr) const -> std::string {
+  return std::format("(= {} {} {})", Print(expr->GetObject()),
+                     expr->GetProperty().GetLexeme(), Print(expr->GetValue()));
+}
+
+auto ASTPrinter::operator()([[maybe_unused]] const ThisExprPtr& expr) const
+    -> std::string {
+  return "this";
 }
 
 auto ASTPrinter::operator()(const UnaryExprPtr& expr) const -> std::string {

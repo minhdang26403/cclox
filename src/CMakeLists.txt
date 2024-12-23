@@ -3,7 +3,9 @@ add_library(lox
   ast_printer.cpp
   environment.cpp
   lox.cpp
+  lox_class.cpp
   lox_function.cpp
+  lox_instance.cpp
   interpreter.cpp
   object.cpp
   parser.cpp

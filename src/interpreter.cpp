@@ -10,7 +10,9 @@
 #include "expr.h"
 #include "lox.h"
 #include "lox_callable.h"
+#include "lox_class.h"
 #include "lox_function.h"
+#include "lox_instance.h"
 #include "object.h"
 #include "return.h"
 #include "stmt.h"
@@ -49,7 +51,24 @@ auto Interpreter::operator()(const BlockStmtPtr& stmt) -> void {
   ExecuteBlockStatement(stmt->GetStatements(), std::move(inner_env));
 }
 
-auto Interpreter::operator()(const ClassStmtPtr&) -> void {}
+auto Interpreter::operator()(const ClassStmtPtr& stmt) -> void {
+  const Token& class_name = stmt->GetClassName();
+
+  environment_->Define(class_name.GetLexeme(), Object{});
+  LoxClass::MethodMap methods;
+  for (const auto& method_var : stmt->GetClassMethods()) {
+    const auto& method = std::get<FunctionStmtPtr>(method_var);
+    std::string method_name = method->GetFunctionName().GetLexeme();
+    const bool is_initializer = method_name == "init";
+    auto function =
+        std::make_shared<LoxFunction>(method, environment_, is_initializer);
+    methods.emplace(std::move(method_name), std::move(function));
+  }
+
+  auto klass =
+      std::make_shared<LoxClass>(class_name.GetLexeme(), std::move(methods));
+  environment_->Assign(class_name, Object{klass});
+}
 
 auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
   assert(stmt);
@@ -57,8 +76,8 @@ auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
 }
 
 auto Interpreter::operator()(const FunctionStmtPtr& stmt) -> void {
-  auto function = std::make_shared<LoxFunction>(stmt, environment_);
-  environment_->Define(stmt->GetName().GetLexeme(), Object{function});
+  auto function = std::make_shared<LoxFunction>(stmt, environment_, false);
+  environment_->Define(stmt->GetFunctionName().GetLexeme(), Object{function});
 }
 
 auto Interpreter::operator()(const IfStmtPtr& stmt) -> void {
@@ -202,9 +221,17 @@ auto Interpreter::operator()(const CallExprPtr& expr) -> Object {
                                    function->Arity(), arguments.size()));
   }
 
-  // TODO(Dang): implement later after implement Function Object
-
   return function->Call(*this, arguments);
+}
+
+auto Interpreter::operator()(const GetExprPtr& expr) -> Object {
+  Object object = EvaluateExpression(expr->GetObject());
+  std::optional<LoxInstancePtr> instance_opt = object.AsLoxInstance();
+  if (instance_opt) {
+    return instance_opt.value()->GetField(expr->GetProperty());
+  }
+
+  throw RuntimeError(expr->GetProperty(), "Only instances have properties.");
 }
 
 auto Interpreter::operator()(const GroupingExprPtr& expr) -> Object {
@@ -232,6 +259,23 @@ auto Interpreter::operator()(const LogicalExprPtr& expr) -> Object {
   }
 
   return EvaluateExpression(expr->GetRightExpression());
+}
+
+auto Interpreter::operator()(const SetExprPtr& expr) -> Object {
+  Object object = EvaluateExpression(expr->GetObject());
+
+  std::optional<LoxInstancePtr> lox_instance_opt = object.AsLoxInstance();
+  if (!lox_instance_opt) {
+    throw RuntimeError(expr->GetProperty(), "Only instances have fields.");
+  }
+
+  Object value = EvaluateExpression(expr->GetValue());
+  lox_instance_opt.value()->SetField(expr->GetProperty(), value);
+  return value;
+}
+
+auto Interpreter::operator()(const ThisExprPtr& expr) -> Object {
+  return LookUpVariable(expr->GetKeyword(), expr);
 }
 
 auto Interpreter::operator()(const UnaryExprPtr& expr) -> Object {

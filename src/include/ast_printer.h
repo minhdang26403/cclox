@@ -59,6 +59,8 @@ class ASTPrinter {
 
   auto operator()(const CallExprPtr& expr) const -> std::string;
 
+  auto operator()(const GetExprPtr& expr) const -> std::string;
+
   /**
    * @brief Formats a grouping expression node.
    * @param expr Shared pointer to the grouping expression.
@@ -74,6 +76,10 @@ class ASTPrinter {
   auto operator()(const LiteralExprPtr& expr) const -> std::string;
 
   auto operator()(const LogicalExprPtr& expr) const -> std::string;
+
+  auto operator()(const SetExprPtr& expr) const -> std::string;
+
+  auto operator()(const ThisExprPtr& expr) const -> std::string;
 
   /**
    * @brief Formats a unary expression node.

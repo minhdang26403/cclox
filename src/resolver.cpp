@@ -11,15 +11,37 @@ auto Resolver::operator()(const BlockStmtPtr& stmt) -> void {
   EndScope();
 }
 
-auto Resolver::operator()([[maybe_unused]] const ClassStmtPtr& stmt) -> void {}
+auto Resolver::operator()(const ClassStmtPtr& stmt) -> void {
+  ClassType enclosing_class = current_class_;
+  current_class_ = ClassType::CLASS;
+
+  Declare(stmt->GetClassName());
+  Define(stmt->GetClassName());
+
+  BeginScope();
+  scopes_.back().emplace("this", true);
+
+  for (const auto& method_var : stmt->GetClassMethods()) {
+    FunctionType declaration = FunctionType::METHOD;
+    const FunctionStmtPtr& method = std::get<FunctionStmtPtr>(method_var);
+    if (method->GetFunctionName().GetLexeme() == "init") {
+      declaration = FunctionType::INITIALIZER;
+    }
+    ResolveFunction(method, declaration);
+  }
+
+  EndScope();
+
+  current_class_ = enclosing_class;
+}
 
 auto Resolver::operator()(const ExprStmtPtr& stmt) -> void {
   ResolveExpression(stmt->GetExpression());
 }
 
 auto Resolver::operator()(const FunctionStmtPtr& stmt) -> void {
-  Declare(stmt->GetName());
-  Define(stmt->GetName());
+  Declare(stmt->GetFunctionName());
+  Define(stmt->GetFunctionName());
 
   ResolveFunction(stmt, FunctionType::FUNCTION);
 }
@@ -45,6 +67,10 @@ auto Resolver::operator()(const ReturnStmtPtr& stmt) -> void {
 
   const std::optional<ExprPtr>& value_expr_opt = stmt->GetValue();
   if (value_expr_opt) {
+    if (current_function_ == FunctionType::INITIALIZER) {
+      Lox::Error(interpreter_.GetOutputStream(), stmt->GetKeyword(),
+                 "Can't return a value from an initializer.");
+    }
     ResolveExpression(value_expr_opt.value());
   }
 }
@@ -98,6 +124,10 @@ auto Resolver::operator()(const CallExprPtr& expr) -> void {
   }
 }
 
+auto Resolver::operator()(const GetExprPtr& expr) -> void {
+  ResolveExpression(expr->GetObject());
+}
+
 auto Resolver::operator()(const GroupingExprPtr& expr) -> void {
   ResolveExpression(expr->GetExpr());
 }
@@ -110,6 +140,19 @@ auto Resolver::operator()([[maybe_unused]] const LiteralExprPtr& expr) -> void {
 auto Resolver::operator()(const LogicalExprPtr& expr) -> void {
   ResolveExpression(expr->GetLeftExpression());
   ResolveExpression(expr->GetRightExpression());
+}
+
+auto Resolver::operator()(const SetExprPtr& expr) -> void {
+  ResolveExpression(expr->GetValue());
+  ResolveExpression(expr->GetObject());
+}
+
+auto Resolver::operator()(const ThisExprPtr& expr) -> void {
+  if (current_class_ == ClassType::CLASS) {
+    Lox::Error(interpreter_.GetOutputStream(), expr->GetKeyword(),
+               "Can't use 'this' outside of a class.");
+  }
+  ResolveLocalVariable(expr, expr->GetKeyword());
 }
 
 auto Resolver::operator()(const UnaryExprPtr& expr) -> void {
@@ -172,11 +215,13 @@ auto Resolver::ResolveFunction(const FunctionStmtPtr& function,
   current_function_ = type;
 
   BeginScope();
+
   for (const auto& param : function->GetParams()) {
     Declare(param);
     Define(param);
   }
   ResolveStatements(function->GetBody());
+
   EndScope();
 
   current_function_ = enclosing_function;

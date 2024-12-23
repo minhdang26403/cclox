@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 
+#include "object.h"
 #include "token.h"
 
 namespace cclox {
@@ -12,26 +13,33 @@ namespace cclox {
 class AssignExpr;
 class BinaryExpr;
 class CallExpr;
+class GetExpr;
 class GroupingExpr;
 class LiteralExpr;
 class LogicalExpr;
+class SetExpr;
+class ThisExpr;
 class UnaryExpr;
 class VariableExpr;
 
 // Use pointers to remove cyclic dependencies between these objects and `Expr`
-// object
+// object.
 using AssignExprPtr = std::shared_ptr<AssignExpr>;
 using BinaryExprPtr = std::shared_ptr<BinaryExpr>;
 using CallExprPtr = std::shared_ptr<CallExpr>;
+using GetExprPtr = std::shared_ptr<GetExpr>;
 using GroupingExprPtr = std::shared_ptr<GroupingExpr>;
 using LiteralExprPtr = std::shared_ptr<LiteralExpr>;
 using LogicalExprPtr = std::shared_ptr<LogicalExpr>;
+using SetExprPtr = std::shared_ptr<SetExpr>;
+using ThisExprPtr = std::shared_ptr<ThisExpr>;
 using UnaryExprPtr = std::shared_ptr<UnaryExpr>;
 using VariableExprPtr = std::shared_ptr<VariableExpr>;
 
 using ExprPtr =
-    std::variant<AssignExprPtr, BinaryExprPtr, CallExprPtr, GroupingExprPtr,
-                 LiteralExprPtr, LogicalExprPtr, UnaryExprPtr, VariableExprPtr>;
+    std::variant<AssignExprPtr, BinaryExprPtr, CallExprPtr, GetExprPtr,
+                 GroupingExprPtr, LiteralExprPtr, LogicalExprPtr, SetExprPtr,
+                 ThisExprPtr, UnaryExprPtr, VariableExprPtr>;
 
 class AssignExpr {
  public:
@@ -103,6 +111,26 @@ class CallExpr {
   std::vector<ExprPtr> arguments_;
 };
 
+class GetExpr {
+ public:
+  GetExpr(ExprPtr object, Token property)
+      : object_(std::move(object)), property_(std::move(property)) {}
+
+  auto GetObject() const noexcept -> const ExprPtr& { return object_; }
+
+  auto GetProperty() const noexcept -> const Token& { return property_; }
+
+  // Non-const lvalue overloads for transfering ownership of GetExpr object's
+  // data member. Must be careful when using these methods.
+  auto GetObject() noexcept -> ExprPtr& { return object_; }
+
+  auto GetProperty() noexcept -> Token& { return property_; }
+
+ private:
+  ExprPtr object_;
+  Token property_;
+};
+
 class GroupingExpr {
  public:
   /**
@@ -155,6 +183,35 @@ class LogicalExpr {
   ExprPtr left_;
   Token op_;
   ExprPtr right_;
+};
+
+class SetExpr {
+ public:
+  SetExpr(ExprPtr object, Token property, ExprPtr value)
+      : object_(std::move(object)),
+        property_(std::move(property)),
+        value_(std::move(value)) {}
+
+  auto GetObject() const noexcept -> const ExprPtr& { return object_; }
+
+  auto GetProperty() const noexcept -> const Token& { return property_; }
+
+  auto GetValue() const noexcept -> const ExprPtr& { return value_; }
+
+ private:
+  ExprPtr object_;
+  Token property_;
+  ExprPtr value_;
+};
+
+class ThisExpr {
+ public:
+  ThisExpr(Token keyword) : keyword_(std::move(keyword)) {}
+
+  auto GetKeyword() const noexcept -> const Token& { return keyword_; }
+
+ private:
+  Token keyword_;
 };
 
 class UnaryExpr {

@@ -82,6 +82,9 @@ auto Parser::Parse() -> std::vector<StmtPtr> {
 
 auto Parser::ParseDeclaration() -> StmtPtr {
   try {
+    if (Match(TokenType::CLASS)) {
+      return ParseClassDeclaration();
+    }
     if (Match(TokenType::FUN)) {
       return ParseFunction("function");
     }
@@ -94,6 +97,19 @@ auto Parser::ParseDeclaration() -> StmtPtr {
     Synchronize();
     return StmtPtr{};
   }
+}
+
+auto Parser::ParseClassDeclaration() -> StmtPtr {
+  Token name = Consume(TokenType::IDENTIFIER, "Expect class name.");
+  Consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
+
+  std::vector<StmtPtr> methods;
+  while (!Check(TokenType::RIGHT_BRACE) && !IsAtEnd()) {
+    methods.emplace_back(ParseFunction("method"));
+  }
+  Consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+
+  return std::make_unique<ClassStmt>(std::move(name), std::move(methods));
 }
 
 auto Parser::ParseFunction(std::string_view kind) -> StmtPtr {
@@ -284,11 +300,21 @@ auto Parser::ParseAssignment() -> ExprPtr {
   if (Match(TokenType::EQUAL)) {
     Token equals = Previous();
     ExprPtr value = ParseAssignment();
-    const auto* variable_expr_ptr = std::get_if<VariableExprPtr>(&expr);
 
+    const auto* variable_expr_ptr = std::get_if<VariableExprPtr>(&expr);
     if (variable_expr_ptr) {
       const Token& variable = (*variable_expr_ptr)->GetVariable();
       return std::make_unique<AssignExpr>(variable, std::move(value));
+    }
+
+    const auto* get_expr_ptr = std::get_if<GetExprPtr>(&expr);
+    if (get_expr_ptr) {
+      ExprPtr& object = (*get_expr_ptr)->GetObject();
+      Token& property = (*get_expr_ptr)->GetProperty();
+      // `expr` will not be used anymore, so it's safe to move member data out
+      // of `expr`.
+      return std::make_unique<SetExpr>(std::move(object), std::move(property),
+                                       std::move(value));
     }
 
     throw Error(equals, "Invalid assignment target.");
@@ -396,6 +422,10 @@ auto Parser::ParseCall() -> ExprPtr {
   while (true) {
     if (Match(TokenType::LEFT_PAREN)) {
       expr = FinishCall(std::move(expr));
+    } else if (Match(TokenType::DOT)) {
+      Token property =
+          Consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+      expr = std::make_unique<GetExpr>(std::move(expr), std::move(property));
     } else {
       break;
     }
@@ -421,6 +451,10 @@ auto Parser::ParsePrimary() -> ExprPtr {
 
   if (Match(NUMBER, STRING)) {
     return make_unique<LiteralExpr>(Previous().GetLiteral());
+  }
+
+  if (Match(THIS)) {
+    return make_unique<ThisExpr>(Previous());
   }
 
   if (Match(IDENTIFIER)) {

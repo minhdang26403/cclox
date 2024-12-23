@@ -15,6 +15,9 @@ namespace cclox {
  */
 class Token {
  public:
+  Token(TokenType type, std::string lexeme)
+      : type_(type), lexeme_(std::move(lexeme)) {}
+
   /**
    * @brief Constructs a Token object.
    * @param type The type of the token (e.g., keyword, identifier, symbol).
@@ -77,9 +80,9 @@ class Token {
   // The textual representation of the token.
   std::string lexeme_;
   // The literal value associated with the token, if any.
-  std::optional<Object> literal_;
+  std::optional<Object> literal_{std::nullopt};
   // The line number where the token was found.
-  uint32_t line_number_;
+  uint32_t line_number_{};
 };
 
 }  // namespace cclox

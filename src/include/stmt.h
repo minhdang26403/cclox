@@ -47,7 +47,21 @@ class BlockStmt {
   std::vector<StmtPtr> statements_;
 };
 
-class ClassStmt {};
+class ClassStmt {
+ public:
+  ClassStmt(Token name, std::vector<StmtPtr> methods)
+      : name_(std::move(name)), methods_(std::move(methods)) {}
+
+  auto GetClassName() const noexcept -> const Token& { return name_; }
+
+  auto GetClassMethods() const noexcept -> const std::vector<StmtPtr>& {
+    return methods_;
+  }
+
+ private:
+  Token name_;
+  std::vector<StmtPtr> methods_;
+};
 
 class ExprStmt {
  public:
@@ -66,7 +80,7 @@ class FunctionStmt {
         params_(std::move(params)),
         body_(std::move(body)) {}
 
-  auto GetName() const noexcept -> const Token& { return name_; }
+  auto GetFunctionName() const noexcept -> const Token& { return name_; }
 
   auto GetParams() const noexcept -> const std::vector<Token>& {
     return params_;
