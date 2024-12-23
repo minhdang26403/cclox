@@ -33,7 +33,7 @@ auto Object::AsString() const noexcept -> std::optional<std::string> {
   return std::nullopt;
 }
 
-auto Object::AsFunction() const noexcept -> std::optional<LoxCallablePtr> {
+auto Object::AsLoxCallable() const noexcept -> std::optional<LoxCallablePtr> {
   if (auto pval = std::get_if<LoxCallablePtr>(&value_)) {
     return *pval;
   }

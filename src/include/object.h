@@ -126,7 +126,7 @@ class Object {
    */
   auto AsString() const noexcept -> std::optional<std::string>;
 
-  auto AsFunction() const noexcept -> std::optional<LoxCallablePtr>;
+  auto AsLoxCallable() const noexcept -> std::optional<LoxCallablePtr>;
 
   auto AsLoxInstance() const noexcept -> std::optional<LoxInstancePtr>;
 

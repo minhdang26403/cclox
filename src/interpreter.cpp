@@ -208,7 +208,7 @@ auto Interpreter::operator()(const CallExprPtr& expr) -> Object {
     arguments.emplace_back(EvaluateExpression(argument));
   }
 
-  std::optional<LoxCallablePtr> function_opt = callee.AsFunction();
+  std::optional<LoxCallablePtr> function_opt = callee.AsLoxCallable();
   if (!function_opt) {
     throw RuntimeError(expr->GetParen(),
                        "Can only call functions and classes.");
