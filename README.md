@@ -60,8 +60,8 @@ The following features are currently implemented in the language:
 - [x] Statements and State
 - [x] Control Flow
 - [x] Functions
-- [ ] Resolving and Binding
-- [ ] Classes
+- [x] Resolving and Binding
+- [x] Classes
 - [ ] Inheritance
 
 ## Contributing
