@@ -54,7 +54,7 @@ auto Interpreter::operator()(const BlockStmtPtr& stmt) -> void {
 auto Interpreter::operator()(const ClassStmtPtr& stmt) -> void {
   const Token& class_name = stmt->GetClassName();
 
-  environment_->Define(class_name.GetLexeme(), Object{});
+  environment_->Define(class_name.GetLexeme(), Object{nullptr});
   LoxClass::MethodMap methods;
   for (const auto& method_var : stmt->GetClassMethods()) {
     const auto& method = std::get<FunctionStmtPtr>(method_var);
