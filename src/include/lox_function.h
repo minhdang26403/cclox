@@ -14,9 +14,9 @@ namespace cclox {
 class LoxFunction : public LoxCallable {
  public:
   LoxFunction(const FunctionStmtPtr& declaration,
-              const std::shared_ptr<Environment>& closure, bool is_initializer)
+              std::shared_ptr<Environment> closure, bool is_initializer)
       : declaration_(declaration),
-        closure_(closure),
+        closure_(std::move(closure)),
         is_initializer_(is_initializer) {}
 
   auto Arity() const noexcept -> size_t override;

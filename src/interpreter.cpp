@@ -77,7 +77,7 @@ auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
 
 auto Interpreter::operator()(const FunctionStmtPtr& stmt) -> void {
   auto function = std::make_shared<LoxFunction>(stmt, environment_, false);
-  environment_->Define(stmt->GetFunctionName().GetLexeme(), Object{function});
+  environment_->Define(stmt->GetFunctionName().GetLexeme(), Object{std::move(function)});
 }
 
 auto Interpreter::operator()(const IfStmtPtr& stmt) -> void {
