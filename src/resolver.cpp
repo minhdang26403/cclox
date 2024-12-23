@@ -108,7 +108,7 @@ auto Resolver::ResolveExpression(const ExprPtr& expr) -> void {
 
 auto Resolver::operator()(const AssignExprPtr& expr) -> void {
   ResolveExpression(expr->GetValue());
-  ResolveLocalVariable(expr, expr->GetVariable());
+  ResolveLocalVariable(ExprPtr{expr}, expr->GetVariable());
 }
 
 auto Resolver::operator()(const BinaryExprPtr& expr) -> void {
@@ -152,7 +152,7 @@ auto Resolver::operator()(const ThisExprPtr& expr) -> void {
     Lox::Error(interpreter_.GetOutputStream(), expr->GetKeyword(),
                "Can't use 'this' outside of a class.");
   }
-  ResolveLocalVariable(expr, expr->GetKeyword());
+  ResolveLocalVariable(ExprPtr{expr}, expr->GetKeyword());
 }
 
 auto Resolver::operator()(const UnaryExprPtr& expr) -> void {
@@ -165,7 +165,7 @@ auto Resolver::operator()(const VariableExprPtr& expr) -> void {
                "Can't read local variable in its own initializer.");
   }
 
-  ResolveLocalVariable(expr, expr->GetVariable());
+  ResolveLocalVariable(ExprPtr{expr}, expr->GetVariable());
 }
 
 auto Resolver::BeginScope() -> void {
