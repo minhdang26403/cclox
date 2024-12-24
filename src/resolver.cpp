@@ -151,7 +151,7 @@ auto Resolver::operator()(const SetExprPtr& expr) -> void {
 }
 
 auto Resolver::operator()(const ThisExprPtr& expr) -> void {
-  if (current_class_ == ClassType::CLASS) {
+  if (current_class_ == ClassType::NONE) {
     Lox::Error(interpreter_.GetOutputStream(), expr->GetKeyword(),
                "Can't use 'this' outside of a class.");
   }
