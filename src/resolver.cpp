@@ -160,9 +160,13 @@ auto Resolver::operator()(const UnaryExprPtr& expr) -> void {
 }
 
 auto Resolver::operator()(const VariableExprPtr& expr) -> void {
-  if (!scopes_.empty() && !scopes_.back().at(expr->GetVariable().GetLexeme())) {
-    Lox::Error(interpreter_.GetOutputStream(), expr->GetVariable(),
-               "Can't read local variable in its own initializer.");
+  std::cout << expr->GetVariable().GetLexeme() << '\n';
+  if (!scopes_.empty()) {
+    auto it = scopes_.back().find(expr->GetVariable().GetLexeme());
+    if (it != scopes_.back().end() && it->second == false) {
+      Lox::Error(interpreter_.GetOutputStream(), expr->GetVariable(),
+                 "Can't read local variable in its own initializer.");
+    }
   }
 
   ResolveLocalVariable(ExprPtr{expr}, expr->GetVariable());
