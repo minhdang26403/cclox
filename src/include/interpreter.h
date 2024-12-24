@@ -26,7 +26,7 @@ class RuntimeError : public std::runtime_error {
    * @param message The error message describing the cause of the runtime error.
    */
   explicit RuntimeError(const Token& token, std::string_view message)
-      : std::runtime_error(std::format("RuntimeError: {}", message)),
+      : std::runtime_error(std::format("Runtime Error: {}", message)),
         token_(token) {}
 
   // The token where the runtime error occurred.

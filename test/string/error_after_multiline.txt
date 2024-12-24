@@ -2,5 +2,5 @@
 2
 3
 
-RuntimeError: Undefined variable 'err'.
+Runtime Error: Undefined variable 'err'.
 [line 8]

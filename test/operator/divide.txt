@@ -2,5 +2,5 @@
 2
 2.5
 1
-RuntimeError: Operands must be numbers.
+Runtime Error: Operands must be numbers.
 [line 5]

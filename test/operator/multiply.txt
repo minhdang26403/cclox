@@ -1,4 +1,4 @@
 7
 6.28319
-RuntimeError: Operands must be numbers.
+Runtime Error: Operands must be numbers.
 [line 3]

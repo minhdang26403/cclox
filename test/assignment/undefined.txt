@@ -1,2 +1,2 @@
-RuntimeError: Undefined variable 'unknown'.
+Runtime Error: Undefined variable 'unknown'.
 [line 1]
