@@ -5,6 +5,9 @@
 #include <sstream>
 #include <variant>
 
+#include "lox_callable.h"
+#include "lox_instance.h"
+
 namespace cclox {
 auto Object::AsInteger() const noexcept -> std::optional<int32_t> {
   if (auto pval = std::get_if<int32_t>(&value_)) {
@@ -78,6 +81,9 @@ auto Object::ToString() const -> std::string {
           return "nil";
         } else if constexpr (std::is_same_v<T, bool>) {
           return value ? "true" : "false";
+        } else if constexpr (std::is_same_v<T, LoxCallablePtr> ||
+                             std::is_same_v<T, LoxInstancePtr>) {
+          return value->ToString();
         } else {
           std::ostringstream oss;
           oss << value;
