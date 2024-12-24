@@ -81,8 +81,9 @@ auto Object::ToString() const -> std::string {
           return "nil";
         } else if constexpr (std::is_same_v<T, bool>) {
           return value ? "true" : "false";
-        } else if constexpr (std::is_same_v<T, LoxCallablePtr> ||
-                             std::is_same_v<T, LoxInstancePtr>) {
+        } else if constexpr (  // NOLINT(readability/braces)
+            std::is_same_v<T, LoxCallablePtr> ||
+            std::is_same_v<T, LoxInstancePtr>) {
           return value->ToString();
         } else {
           std::ostringstream oss;
