@@ -201,6 +201,10 @@ auto Resolver::Define(const Token& variable) -> void {
 
 auto Resolver::ResolveLocalVariable(const ExprPtr& expr, const Token& variable)
     -> void {
+  if (scopes_.empty()) {
+    return;
+  }
+
   for (size_t i = scopes_.size() - 1; i >= 0; i--) {
     if (scopes_.at(i).contains(variable.GetLexeme())) {
       interpreter_.ResolveVariable(expr, scopes_.size() - 1 - i);
