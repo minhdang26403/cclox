@@ -77,7 +77,8 @@ auto Interpreter::operator()(const ExprStmtPtr& stmt) -> void {
 
 auto Interpreter::operator()(const FunctionStmtPtr& stmt) -> void {
   auto function = std::make_shared<LoxFunction>(stmt, environment_, false);
-  environment_->Define(stmt->GetFunctionName().GetLexeme(), Object{std::move(function)});
+  environment_->Define(stmt->GetFunctionName().GetLexeme(),
+                       Object{std::move(function)});
 }
 
 auto Interpreter::operator()(const IfStmtPtr& stmt) -> void {
@@ -134,9 +135,11 @@ auto Interpreter::ExecuteBlockStatement(
     for (const auto& statement : statements) {
       ExecuteStatement(statement);
     }
-  } catch (const RuntimeError& error) {
+  } catch (const std::runtime_error&) {
+    // Catch generic `std::runtime_error`, which is the base class of both
+    // `RuntimeError` exception and `Return` exception so that we can restore
+    // environment in both cases.
     environment_ = move(previous);
-    // Rethrow the exception.
     throw;
   }
 
