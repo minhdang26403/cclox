@@ -1,0 +1,11 @@
+class Egotist {
+  speak() {
+    print this.name;
+  }
+}
+
+var person = Egotist();
+person.name = "John";
+
+var method = person.speak;
+method();
