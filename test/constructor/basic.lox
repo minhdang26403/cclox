@@ -1,0 +1,11 @@
+class Foo {
+  init(x, y) {
+    print "construct Foo object";
+    this.x = x;
+    this.y = y;
+  }
+}
+
+var foo = Foo(1, 7);
+print foo.x;
+print foo.y;
