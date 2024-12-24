@@ -1,4 +1,7 @@
 #include "resolver.h"
+
+#include <cassert>
+
 #include "expr.h"
 #include "lox.h"
 #include "stmt.h"
@@ -160,7 +163,6 @@ auto Resolver::operator()(const UnaryExprPtr& expr) -> void {
 }
 
 auto Resolver::operator()(const VariableExprPtr& expr) -> void {
-  std::cout << expr->GetVariable().GetLexeme() << '\n';
   if (!scopes_.empty()) {
     auto it = scopes_.back().find(expr->GetVariable().GetLexeme());
     if (it != scopes_.back().end() && it->second == false) {
@@ -205,13 +207,12 @@ auto Resolver::Define(const Token& variable) -> void {
 
 auto Resolver::ResolveLocalVariable(const ExprPtr& expr, const Token& variable)
     -> void {
-  if (scopes_.empty()) {
-    return;
-  }
-
-  for (size_t i = scopes_.size() - 1; i >= 0; i--) {
-    if (scopes_.at(i).contains(variable.GetLexeme())) {
-      interpreter_.ResolveVariable(expr, scopes_.size() - 1 - i);
+  for (auto rit = scopes_.rbegin(); rit != scopes_.rend(); rit++) {
+    if (rit->contains(variable.GetLexeme())) {
+      ptrdiff_t depth = rit - scopes_.rbegin();
+      // Safety check before casting the variable to unsigned type.
+      assert(depth >= 0);
+      interpreter_.ResolveVariable(expr, static_cast<uint64_t>(depth));
       return;
     }
   }
