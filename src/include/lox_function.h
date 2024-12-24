@@ -27,7 +27,7 @@ class LoxFunction : public LoxCallable {
 
   auto ToString() const -> std::string override;
 
-  auto Bind(const LoxInstance& instance) const -> LoxCallablePtr;
+  auto Bind(const LoxInstancePtr& instance) const -> LoxCallablePtr;
 
  private:
   const FunctionStmtPtr& declaration_;

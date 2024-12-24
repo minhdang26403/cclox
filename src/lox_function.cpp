@@ -45,9 +45,9 @@ auto LoxFunction::ToString() const -> std::string {
   return std::format("<fn {}>", declaration_->GetFunctionName().GetLexeme());
 }
 
-auto LoxFunction::Bind(const LoxInstance& instance) const -> LoxCallablePtr {
+auto LoxFunction::Bind(const LoxInstancePtr& instance) const -> LoxCallablePtr {
   auto environment = std::make_shared<Environment>(closure_);
-  environment->Define("this", Object{std::make_shared<LoxInstance>(instance)});
+  environment->Define("this", Object{instance});
   return std::make_shared<LoxFunction>(declaration_, std::move(environment),
                                        is_initializer_);
 }

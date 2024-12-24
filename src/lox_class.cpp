@@ -30,11 +30,11 @@ auto LoxClass::Call(Interpreter& interpreter,
   LoxCallablePtr initializer = FindMethod("init");
   if (initializer) {
     std::static_pointer_cast<LoxFunction>(initializer)
-        ->Bind(*instance)
+        ->Bind(instance)
         ->Call(interpreter, arguments);
   }
 
-  return Object{instance};
+  return Object{std::move(instance)};
 }
 
 auto LoxClass::ToString() const -> std::string {

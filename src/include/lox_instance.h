@@ -1,13 +1,14 @@
 #ifndef LOX_INSTANCE_H_
 #define LOX_INSTANCE_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "lox_class.h"
 
 namespace cclox {
-class LoxInstance {
+class LoxInstance : public std::enable_shared_from_this<LoxInstance> {
  public:
   using FieldMap = std::unordered_map<std::string, Object>;
 

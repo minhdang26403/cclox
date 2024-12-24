@@ -1,4 +1,5 @@
 #include "lox_instance.h"
+
 #include "interpreter.h"
 #include "lox_function.h"
 #include "object.h"
@@ -13,7 +14,7 @@ auto LoxInstance::GetField(const Token& field) -> Object {
   LoxCallablePtr method = klass_.FindMethod(field_name);
   if (method) {
     LoxCallablePtr new_method =
-        static_pointer_cast<LoxFunction>(method)->Bind(*this);
+        static_pointer_cast<LoxFunction>(method)->Bind(shared_from_this());
     return Object{std::move(new_method)};
   }
 
