@@ -38,9 +38,9 @@ class RuntimeError : public std::runtime_error {
  */
 class Interpreter {
  public:
-  Interpreter() = default;
+  Interpreter();
 
-  explicit Interpreter(std::ostream& output) : output_(output) {}
+  explicit Interpreter(std::ostream& output);
 
   /**
    * @brief Evaluates an expression and prints its result.
@@ -129,6 +129,8 @@ class Interpreter {
   using ResolvedVariableMap = std::unordered_map<ExprPtr, size_t>;
 
  private:
+  auto DefineNativeFunctions() -> void;
+
   /**
    * @brief Tests equality between two Objects.
    * @param left Left operand of the equality comparison.

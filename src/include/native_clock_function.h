@@ -9,7 +9,7 @@
 #include "object.h"
 
 namespace cclox {
-class NativeFunction : public LoxCallable {
+class NativeClockFunction : public LoxCallable {
  public:
   auto Arity() const noexcept -> size_t { return 0; }
 
@@ -18,7 +18,7 @@ class NativeFunction : public LoxCallable {
     auto now =
         duration_cast<milliseconds>(system_clock::now().time_since_epoch())
             .count();
-    return Object{now / 1000.0};
+    return Object{static_cast<double>(now) / 1000.0};
   }
 
   auto ToString() const -> std::string { return "<native fn>"; }

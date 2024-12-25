@@ -13,6 +13,7 @@
 #include "lox_class.h"
 #include "lox_function.h"
 #include "lox_instance.h"
+#include "native_clock_function.h"
 #include "object.h"
 #include "return.h"
 #include "stmt.h"
@@ -20,6 +21,14 @@
 #include "token_type.h"
 
 namespace cclox {
+Interpreter::Interpreter() {
+  DefineNativeFunctions();
+}
+
+Interpreter::Interpreter(std::ostream& output) : output_(output) {
+  DefineNativeFunctions();
+}
+
 auto Interpreter::Interpret(const std::vector<StmtPtr>& statements) -> void {
   try {
     for (const auto& statement : statements) {
@@ -307,6 +316,10 @@ auto Interpreter::operator()(const VariableExprPtr& expr) -> Object {
 }
 
 // ====================Private method implementations====================
+auto Interpreter::DefineNativeFunctions() -> void {
+  environment_->Define("clock",
+                       Object{std::make_shared<NativeClockFunction>()});
+}
 
 auto Interpreter::Equal(const Object& left, const Object& right) const -> bool {
   std::optional<double> left_num = left.AsDouble();
