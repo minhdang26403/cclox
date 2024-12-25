@@ -47,7 +47,7 @@ auto Interpreter::operator()(const BlockStmtPtr& stmt) -> void {
   assert(stmt);
   // Create a new inner env for this block.
   // The inner env will has the current env as its enclosing env.
-  auto inner_env = std::make_shared<Environment>(environment_);
+  auto inner_env = Environment::Create(environment_);
   ExecuteBlockStatement(stmt->GetStatements(), std::move(inner_env));
 }
 

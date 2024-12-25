@@ -209,7 +209,7 @@ class Interpreter {
   auto LookUpVariable(const Token& variable, const ExprPtr& expr) -> Object;
 
   // The environment that stores variables' values.
-  const std::shared_ptr<Environment> globals_{std::make_shared<Environment>()};
+  const std::shared_ptr<Environment> globals_{Environment::Create()};
   std::shared_ptr<Environment> environment_{globals_};
   std::unordered_map<ExprPtr, size_t> locals_;
   std::ostream& output_{std::cout};

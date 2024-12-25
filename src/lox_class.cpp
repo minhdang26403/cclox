@@ -26,7 +26,7 @@ auto LoxClass::Arity() const noexcept -> size_t {
 
 auto LoxClass::Call(Interpreter& interpreter,
                     const std::vector<Object>& arguments) -> Object {
-  auto instance = std::make_shared<LoxInstance>(*this);
+  LoxInstancePtr instance = LoxInstance::Create(*this);
   LoxCallablePtr initializer = FindMethod("init");
   if (initializer) {
     std::static_pointer_cast<LoxFunction>(initializer)

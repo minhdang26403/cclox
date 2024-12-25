@@ -2,6 +2,15 @@
 #include "interpreter.h"
 
 namespace cclox {
+auto Environment::Create() -> std::shared_ptr<Environment> {
+  return std::shared_ptr<Environment>(new Environment());
+}
+
+auto Environment::Create(const std::shared_ptr<Environment>& enclosing)
+    -> std::shared_ptr<Environment> {
+  return std::shared_ptr<Environment>(new Environment(enclosing));
+}
+
 auto Environment::Get(const Token& variable) const -> Object {
   const std::string& variable_name = variable.GetLexeme();
   if (values_.contains(variable_name)) {

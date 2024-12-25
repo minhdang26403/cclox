@@ -12,15 +12,13 @@
 namespace cclox {
 class Environment : public std::enable_shared_from_this<Environment> {
  public:
-  Environment() = default;
+  // Ensure that client code cannot directly call the constructor and can only
+  // create instances of Environment as std::shared_ptr to support the usage of
+  // shared_from_this.
+  static auto Create() -> std::shared_ptr<Environment>;
 
-  /**
-   * @brief Construct a new Environment object given a pointer to the outer
-   * environment.
-   * @param enclosing The enclosing environment.
-   */
-  explicit Environment(const std::shared_ptr<Environment>& enclosing)
-      : enclosing_(enclosing) {}
+  static auto Create(const std::shared_ptr<Environment>& enclosing)
+      -> std::shared_ptr<Environment>;
 
   auto Get(const Token& variable) const -> Object;
 
@@ -37,6 +35,11 @@ class Environment : public std::enable_shared_from_this<Environment> {
       -> const std::shared_ptr<Environment>&;
 
  private:
+  Environment() = default;
+
+  explicit Environment(const std::shared_ptr<Environment>& enclosing)
+      : enclosing_(enclosing) {}
+
   auto Ancestor(uint64_t distance) -> std::shared_ptr<Environment>;
 
   std::unordered_map<std::string, Object> values_;

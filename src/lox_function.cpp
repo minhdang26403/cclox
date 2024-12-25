@@ -14,7 +14,7 @@ auto LoxFunction::Arity() const noexcept -> size_t {
 
 auto LoxFunction::Call(Interpreter& interpreter,
                        const std::vector<Object>& arguments) -> Object {
-  auto environment = std::make_shared<Environment>(closure_);
+  auto environment = Environment::Create(closure_);
   const std::vector<Token>& params = declaration_->GetParams();
   for (size_t i = 0; i < params.size(); i++) {
     environment->Define(params[i].GetLexeme(), arguments[i]);
@@ -46,7 +46,7 @@ auto LoxFunction::ToString() const -> std::string {
 }
 
 auto LoxFunction::Bind(const LoxInstancePtr& instance) const -> LoxCallablePtr {
-  auto environment = std::make_shared<Environment>(closure_);
+  auto environment = Environment::Create(closure_);
   environment->Define("this", Object{instance});
   return std::make_shared<LoxFunction>(declaration_, std::move(environment),
                                        is_initializer_);
