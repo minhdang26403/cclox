@@ -33,6 +33,8 @@ class Scanner {
    */
   auto ScanTokens() -> std::vector<Token>;
 
+  using TokenTypeMap = std::unordered_map<std::string, TokenType>;
+
  private:
   /**
    * @brief Checks if the scanner has reached the end of the source code.
@@ -128,7 +130,7 @@ class Scanner {
    */
   auto AddToken(TokenType type, std::optional<Object> literal) -> void;
 
-  static const std::unordered_map<std::string, TokenType> keywords;
+  static const TokenTypeMap keywords;
 
   // The source code being scanned.
   std::string source_;

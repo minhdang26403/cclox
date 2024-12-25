@@ -126,6 +126,8 @@ class Interpreter {
 
   auto operator()(const VariableExprPtr& expr) -> Object;
 
+  using ResolvedVariableMap = std::unordered_map<ExprPtr, size_t>;
+
  private:
   /**
    * @brief Tests equality between two Objects.
@@ -211,7 +213,7 @@ class Interpreter {
   // The environment that stores variables' values.
   const std::shared_ptr<Environment> globals_{Environment::Create()};
   std::shared_ptr<Environment> environment_{globals_};
-  std::unordered_map<ExprPtr, size_t> locals_;
+  ResolvedVariableMap locals_;
   std::ostream& output_{std::cout};
 };
 }  // namespace cclox

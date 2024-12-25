@@ -34,6 +34,8 @@ class Environment : public std::enable_shared_from_this<Environment> {
   auto GetEnclosingEnvironment() const noexcept
       -> const std::shared_ptr<Environment>&;
 
+  using VariableMap = std::unordered_map<std::string, Object>;
+
  private:
   Environment() = default;
 
@@ -42,7 +44,7 @@ class Environment : public std::enable_shared_from_this<Environment> {
 
   auto Ancestor(uint64_t distance) -> std::shared_ptr<Environment>;
 
-  std::unordered_map<std::string, Object> values_;
+  VariableMap values_;
   std::shared_ptr<Environment> enclosing_;
 };
 }  // namespace cclox

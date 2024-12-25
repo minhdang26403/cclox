@@ -18,7 +18,7 @@ namespace cclox {
 // clang-format off
 
 // A map of reserved keywords in the Lox language.
-const std::unordered_map<std::string, TokenType> Scanner::keywords = {
+const Scanner::TokenTypeMap Scanner::keywords = {
     {"and", TokenType::AND},
     {"class",  TokenType::CLASS},
     {"else",   TokenType::ELSE},

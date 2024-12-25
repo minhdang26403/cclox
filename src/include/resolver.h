@@ -58,7 +58,8 @@ class Resolver {
 
   auto operator()(const VariableExprPtr& expr) -> void;
 
- private:
+  using SymbolTable = std::unordered_map<std::string, bool>;
+
   enum class FunctionType {
     NONE,
     FUNCTION,
@@ -71,6 +72,7 @@ class Resolver {
     CLASS,
   };
 
+ private:
   auto ResolveStatement(const StmtPtr& stmt) -> void;
 
   auto ResolveExpression(const ExprPtr& expr) -> void;
@@ -89,7 +91,7 @@ class Resolver {
       -> void;
 
   Interpreter& interpreter_;
-  std::vector<std::unordered_map<std::string, bool>> scopes_;
+  std::vector<SymbolTable> scopes_;
   FunctionType current_function_{FunctionType::NONE};
   ClassType current_class_{ClassType::NONE};
 };

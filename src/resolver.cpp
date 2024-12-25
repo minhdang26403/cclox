@@ -188,7 +188,7 @@ auto Resolver::Declare(const Token& variable) -> void {
     return;
   }
 
-  std::unordered_map<std::string, bool>& scope = scopes_.back();
+  SymbolTable& scope = scopes_.back();
   if (scope.contains(variable.GetLexeme())) {
     Lox::Error(interpreter_.GetOutputStream(), variable,
                "Already a variable with this name in this scope.");
@@ -201,7 +201,7 @@ auto Resolver::Define(const Token& variable) -> void {
   if (scopes_.empty()) {
     return;
   }
-  std::unordered_map<std::string, bool>& scope = scopes_.back();
+  SymbolTable& scope = scopes_.back();
   scope[variable.GetLexeme()] = true;
 }
 
