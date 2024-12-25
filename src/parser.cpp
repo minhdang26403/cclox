@@ -81,14 +81,16 @@ auto Parser::Parse() -> std::vector<StmtPtr> {
 }
 
 auto Parser::ParseDeclaration() -> StmtPtr {
+  using enum TokenType;
+
   try {
-    if (Match(TokenType::CLASS)) {
+    if (Match(CLASS)) {
       return ParseClassDeclaration();
     }
-    if (Match(TokenType::FUN)) {
+    if (Match(FUN)) {
       return ParseFunction("function");
     }
-    if (Match(TokenType::VAR)) {
+    if (Match(VAR)) {
       return ParseVarDeclaration();
     }
 
@@ -100,20 +102,25 @@ auto Parser::ParseDeclaration() -> StmtPtr {
 }
 
 auto Parser::ParseClassDeclaration() -> StmtPtr {
-  Token name = Consume(TokenType::IDENTIFIER, "Expect class name.");
-  Consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
+  using enum TokenType;
+  using std::move;
+
+  Token name = Consume(IDENTIFIER, "Expect class name.");
+  Consume(LEFT_BRACE, "Expect '{' before class body.");
 
   std::vector<StmtPtr> methods;
-  while (!Check(TokenType::RIGHT_BRACE) && !IsAtEnd()) {
+  while (!Check(RIGHT_BRACE) && !IsAtEnd()) {
     methods.emplace_back(ParseFunction("method"));
   }
-  Consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+  Consume(RIGHT_BRACE, "Expect '}' after class body.");
 
-  return std::make_unique<ClassStmt>(std::move(name), std::move(methods));
+  return std::make_unique<ClassStmt>(move(name), move(methods));
 }
 
 auto Parser::ParseFunction(std::string_view kind) -> StmtPtr {
   using enum TokenType;
+  using std::move;
+
   // Parse function name.
   Token name = Consume(IDENTIFIER, std::format("Expect {} name.", kind));
   Consume(LEFT_PAREN, std::format("Expect '(' after {} name.", kind));
@@ -134,12 +141,14 @@ auto Parser::ParseFunction(std::string_view kind) -> StmtPtr {
   Consume(LEFT_BRACE, std::format("Expect '{{' before {} body.", kind));
   std::vector<StmtPtr> body = ParseBlockStatement();
 
-  return std::make_unique<FunctionStmt>(std::move(name), std::move(parameters),
-                                        std::move(body));
+  return std::make_unique<FunctionStmt>(move(name), move(parameters),
+                                        move(body));
 }
 
 auto Parser::ParseVarDeclaration() -> StmtPtr {
   using enum TokenType;
+  using std::move;
+
   Token name = Consume(IDENTIFIER, "Expect variable name.");
 
   std::optional<ExprPtr> initializer;
@@ -148,11 +157,12 @@ auto Parser::ParseVarDeclaration() -> StmtPtr {
   }
 
   Consume(SEMICOLON, "Expect ';' after variable declaration.");
-  return std::make_unique<VarStmt>(std::move(name), std::move(initializer));
+  return std::make_unique<VarStmt>(move(name), move(initializer));
 }
 
 auto Parser::ParseStatement() -> StmtPtr {
   using enum TokenType;
+
   if (Match(FOR)) {
     return ParseForStatement();
   }
@@ -177,6 +187,8 @@ auto Parser::ParseStatement() -> StmtPtr {
 
 auto Parser::ParseForStatement() -> StmtPtr {
   using enum TokenType;
+  using std::make_unique, std::move;
+
   Consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
   std::optional<StmtPtr> initializer_stmt;
@@ -201,8 +213,6 @@ auto Parser::ParseForStatement() -> StmtPtr {
   Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
   StmtPtr body = ParseStatement();
-
-  using std::make_unique, std::move;
 
   if (increment_expr) {
     std::vector<StmtPtr> statements;
@@ -230,18 +240,21 @@ auto Parser::ParseForStatement() -> StmtPtr {
 }
 
 auto Parser::ParseIfStatement() -> StmtPtr {
-  Consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+  using enum TokenType;
+  using std::move;
+
+  Consume(LEFT_PAREN, "Expect '(' after 'if'.");
   ExprPtr condition = ParseExpression();
-  Consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+  Consume(RIGHT_PAREN, "Expect ')' after if condition.");
 
   StmtPtr then_branch = ParseStatement();
   std::optional<StmtPtr> else_branch;
-  if (Match(TokenType::ELSE)) {
+  if (Match(ELSE)) {
     else_branch = ParseStatement();
   }
 
-  return std::make_unique<IfStmt>(std::move(condition), std::move(then_branch),
-                                  std::move(else_branch));
+  return std::make_unique<IfStmt>(move(condition), move(then_branch),
+                                  move(else_branch));
 }
 
 auto Parser::ParsePrintStatement() -> StmtPtr {
@@ -252,6 +265,8 @@ auto Parser::ParsePrintStatement() -> StmtPtr {
 }
 
 auto Parser::ParseReturnStatement() -> StmtPtr {
+  using std::move;
+
   Token keyword = Previous();
 
   std::optional<ExprPtr> value;
@@ -260,16 +275,18 @@ auto Parser::ParseReturnStatement() -> StmtPtr {
   }
   Consume(TokenType::SEMICOLON, "Expect ';' after return value.");
 
-  return std::make_unique<ReturnStmt>(std::move(keyword), std::move(value));
+  return std::make_unique<ReturnStmt>(move(keyword), move(value));
 }
 
 auto Parser::ParseWhileStatement() -> StmtPtr {
+  using std::move;
+
   Consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
   ExprPtr condition = ParseExpression();
   Consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
   StmtPtr body = ParseStatement();
 
-  return std::make_unique<WhileStmt>(std::move(condition), std::move(body));
+  return std::make_unique<WhileStmt>(move(condition), move(body));
 }
 
 auto Parser::ParseExpressionStatement() -> StmtPtr {
@@ -295,6 +312,9 @@ auto Parser::ParseExpression() -> ExprPtr {
 }
 
 auto Parser::ParseAssignment() -> ExprPtr {
+  using std::make_unique;
+  using std::move;
+
   ExprPtr expr = ParseOr();
 
   if (Match(TokenType::EQUAL)) {
@@ -304,7 +324,7 @@ auto Parser::ParseAssignment() -> ExprPtr {
     const auto* variable_expr_ptr = std::get_if<VariableExprPtr>(&expr);
     if (variable_expr_ptr) {
       const Token& variable = (*variable_expr_ptr)->GetVariable();
-      return std::make_unique<AssignExpr>(variable, std::move(value));
+      return make_unique<AssignExpr>(variable, move(value));
     }
 
     const auto* get_expr_ptr = std::get_if<GetExprPtr>(&expr);
@@ -313,8 +333,7 @@ auto Parser::ParseAssignment() -> ExprPtr {
       Token& property = (*get_expr_ptr)->GetProperty();
       // `expr` will not be used anymore, so it's safe to move member data out
       // of `expr`.
-      return std::make_unique<SetExpr>(std::move(object), std::move(property),
-                                       std::move(value));
+      return make_unique<SetExpr>(move(object), move(property), move(value));
     }
 
     throw Error(equals, "Invalid assignment target.");
@@ -324,82 +343,88 @@ auto Parser::ParseAssignment() -> ExprPtr {
 }
 
 auto Parser::ParseOr() -> ExprPtr {
+  using std::move;
+
   ExprPtr expr = ParseAnd();
 
   while (Match(TokenType::OR)) {
     Token op = Previous();
     ExprPtr right = ParseAnd();
-    expr = std::make_unique<LogicalExpr>(std::move(expr), std::move(op),
-                                         std::move(right));
+    expr = std::make_unique<LogicalExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
 }
 
 auto Parser::ParseAnd() -> ExprPtr {
+  using std::move;
+
   ExprPtr expr = ParseEquality();
 
   while (Match(TokenType::AND)) {
     Token op = Previous();
     ExprPtr right = ParseEquality();
-    expr = std::make_unique<LogicalExpr>(std::move(expr), std::move(op),
-                                         std::move(right));
+    expr = std::make_unique<LogicalExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
 }
 
 auto Parser::ParseEquality() -> ExprPtr {
-  ExprPtr expr = ParseComparison();
   using enum TokenType;
+  using std::move;
+
+  ExprPtr expr = ParseComparison();
 
   while (Match(BANG_EQUAL, EQUAL_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseComparison();
-    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                        std::move(right));
+    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
 }
 
 auto Parser::ParseComparison() -> ExprPtr {
-  ExprPtr expr = ParseTerm();
   using enum TokenType;
+  using std::move;
+
+  ExprPtr expr = ParseTerm();
 
   while (Match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseTerm();
-    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                        std::move(right));
+    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
 }
 
 auto Parser::ParseTerm() -> ExprPtr {
-  ExprPtr expr = ParseFactor();
   using enum TokenType;
+  using std::move;
+
+  ExprPtr expr = ParseFactor();
 
   while (Match(MINUS, PLUS)) {
     Token op = Previous();
     ExprPtr right = ParseFactor();
-    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                        std::move(right));
+    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
 }
 
 auto Parser::ParseFactor() -> ExprPtr {
-  ExprPtr expr = ParseUnary();
   using enum TokenType;
+  using std::move;
+
+  ExprPtr expr = ParseUnary();
 
   while (Match(SLASH, STAR)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    expr = std::make_unique<BinaryExpr>(std::move(expr), std::move(op),
-                                        std::move(right));
+    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -407,25 +432,29 @@ auto Parser::ParseFactor() -> ExprPtr {
 
 auto Parser::ParseUnary() -> ExprPtr {
   using enum TokenType;
+  using std::move;
+
   if (Match(BANG, MINUS)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    return std::make_unique<UnaryExpr>(std::move(op), std::move(right));
+    return std::make_unique<UnaryExpr>(move(op), move(right));
   }
 
   return ParseCall();
 }
 
 auto Parser::ParseCall() -> ExprPtr {
+  using std::move;
+
   ExprPtr expr = ParsePrimary();
 
   while (true) {
     if (Match(TokenType::LEFT_PAREN)) {
-      expr = FinishCall(std::move(expr));
+      expr = FinishCall(move(expr));
     } else if (Match(TokenType::DOT)) {
       Token property =
           Consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
-      expr = std::make_unique<GetExpr>(std::move(expr), std::move(property));
+      expr = std::make_unique<GetExpr>(move(expr), move(property));
     } else {
       break;
     }
@@ -550,6 +579,8 @@ auto Parser::Synchronize() noexcept -> void {
 }
 
 auto Parser::FinishCall(ExprPtr callee) -> ExprPtr {
+  using std::move;
+
   std::vector<ExprPtr> arguments;
 
   if (!Check(TokenType::RIGHT_PAREN)) {
@@ -563,8 +594,7 @@ auto Parser::FinishCall(ExprPtr callee) -> ExprPtr {
 
   Token paren = Consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.");
 
-  return std::make_unique<CallExpr>(std::move(callee), std::move(paren),
-                                    std::move(arguments));
+  return std::make_unique<CallExpr>(move(callee), move(paren), move(arguments));
 }
 
 }  // namespace cclox

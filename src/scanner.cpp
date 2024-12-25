@@ -56,25 +56,26 @@ auto Scanner::IsAtEnd() const noexcept -> bool {
 
 auto Scanner::ScanToken() -> void {
   char c = Advance();
+  using enum TokenType;
 
   switch (c) {
     case '(':
-      AddToken(TokenType::LEFT_PAREN);
+      AddToken(LEFT_PAREN);
       break;
     case ')':
-      AddToken(TokenType::RIGHT_PAREN);
+      AddToken(RIGHT_PAREN);
       break;
     case '{':
-      AddToken(TokenType::LEFT_BRACE);
+      AddToken(LEFT_BRACE);
       break;
     case '}':
-      AddToken(TokenType::RIGHT_BRACE);
+      AddToken(RIGHT_BRACE);
       break;
     case ',':
-      AddToken(TokenType::COMMA);
+      AddToken(COMMA);
       break;
     case '.':
-      AddToken(TokenType::DOT);
+      AddToken(DOT);
       break;
     case '-':
       // We can't always split the minus sign and the following numeric value
@@ -84,29 +85,29 @@ auto Scanner::ScanToken() -> void {
       if (IsDigit(Peek())) {
         ScanNumber();
       } else {
-        AddToken(TokenType::MINUS);
+        AddToken(MINUS);
       }
       break;
     case '+':
-      AddToken(TokenType::PLUS);
+      AddToken(PLUS);
       break;
     case ';':
-      AddToken(TokenType::SEMICOLON);
+      AddToken(SEMICOLON);
       break;
     case '*':
-      AddToken(TokenType::STAR);
+      AddToken(STAR);
       break;
     case '!':
-      AddToken(Match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+      AddToken(Match('=') ? BANG_EQUAL : BANG);
       break;
     case '=':
-      AddToken(Match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+      AddToken(Match('=') ? EQUAL_EQUAL : EQUAL);
       break;
     case '<':
-      AddToken(Match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+      AddToken(Match('=') ? LESS_EQUAL : LESS);
       break;
     case '>':
-      AddToken(Match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+      AddToken(Match('=') ? GREATER_EQUAL : GREATER);
       break;
     case '/':
       if (Match('/')) {
@@ -115,7 +116,7 @@ auto Scanner::ScanToken() -> void {
           Advance();
         }
       } else {
-        AddToken(TokenType::SLASH);
+        AddToken(SLASH);
       }
       break;
     case ' ':
@@ -147,7 +148,7 @@ auto Scanner::ScanIdentifier() -> void {
   }
 
   std::string text = source_.substr(start_, current_ - start_);
-  TokenType type = TokenType::IDENTIFIER;
+  auto type = TokenType::IDENTIFIER;
   if (keywords.contains(text)) {
     type = keywords.at(text);
   }
