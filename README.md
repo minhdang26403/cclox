@@ -44,10 +44,10 @@ Replace `[script]` with the path to your `.lox` script file to execute it using 
 
 ## Running Tests
 Tests are implemented using [GoogleTest](https://github.com/google/googletest). You can find all test cases in the `test/` directory. After building the project, you can run the tests using the generated test executable in the `build/bin` directory. For example:
-    ```bash
-    cd build/bin
-    ./interpreter_test
-    ```
+```bash
+cd build/bin
+./interpreter_test
+```
 
 The `interpreter_test` executable runs all tests in the `test/` directory. To create your own tests, create a new directory for your test suite and add sample Lox programs and the expected output files from these programs.
 
