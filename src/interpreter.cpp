@@ -318,8 +318,10 @@ auto Interpreter::operator()(const SuperExprPtr& expr) -> Object {
   Object object =
       environment_->GetAt(distance - 1, Token{TokenType::THIS, "this"});
 
-  auto superclass_ptr = static_pointer_cast<LoxClass>(
-      std::get<LoxCallablePtr>(superclass.Value()));
+  // The generic Object `superclass`should contain a LoxCallable in normal
+  // cases.
+  auto superclass_ptr =
+      static_pointer_cast<LoxClass>(superclass.AsLoxCallable().value());
   LoxCallablePtr method =
       superclass_ptr->FindMethod(expr->GetMethod().GetLexeme());
 
@@ -329,8 +331,9 @@ auto Interpreter::operator()(const SuperExprPtr& expr) -> Object {
         std::format("Undefined property '{}'.", expr->GetMethod().GetLexeme()));
   }
 
+  // The generic Object `object` should contain a LoxInstance in normal cases.
   return Object{static_pointer_cast<LoxFunction>(method)->Bind(
-      std::get<LoxInstancePtr>(object.Value()))};
+      object.AsLoxInstance().value())};
 }
 
 auto Interpreter::operator()(const ThisExprPtr& expr) -> Object {
