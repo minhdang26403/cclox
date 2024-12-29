@@ -320,7 +320,7 @@ auto Parser::ParseExpression() -> ExprPtr {
 }
 
 auto Parser::ParseAssignment() -> ExprPtr {
-  using std::make_unique;
+  using std::make_shared;
   using std::move;
 
   ExprPtr expr = ParseOr();
@@ -332,7 +332,7 @@ auto Parser::ParseAssignment() -> ExprPtr {
     const auto* variable_expr_ptr = std::get_if<VariableExprPtr>(&expr);
     if (variable_expr_ptr) {
       const Token& variable = (*variable_expr_ptr)->GetVariable();
-      return make_unique<AssignExpr>(variable, move(value));
+      return make_shared<AssignExpr>(variable, move(value));
     }
 
     const auto* get_expr_ptr = std::get_if<GetExprPtr>(&expr);
@@ -341,7 +341,7 @@ auto Parser::ParseAssignment() -> ExprPtr {
       Token& property = (*get_expr_ptr)->GetProperty();
       // `expr` will not be used anymore, so it's safe to move member data out
       // of `expr`.
-      return make_unique<SetExpr>(move(object), move(property), move(value));
+      return make_shared<SetExpr>(move(object), move(property), move(value));
     }
 
     throw Error(equals, "Invalid assignment target.");
@@ -358,7 +358,7 @@ auto Parser::ParseOr() -> ExprPtr {
   while (Match(TokenType::OR)) {
     Token op = Previous();
     ExprPtr right = ParseAnd();
-    expr = std::make_unique<LogicalExpr>(move(expr), move(op), move(right));
+    expr = std::make_shared<LogicalExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -372,7 +372,7 @@ auto Parser::ParseAnd() -> ExprPtr {
   while (Match(TokenType::AND)) {
     Token op = Previous();
     ExprPtr right = ParseEquality();
-    expr = std::make_unique<LogicalExpr>(move(expr), move(op), move(right));
+    expr = std::make_shared<LogicalExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -387,7 +387,7 @@ auto Parser::ParseEquality() -> ExprPtr {
   while (Match(BANG_EQUAL, EQUAL_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseComparison();
-    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
+    expr = std::make_shared<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -402,7 +402,7 @@ auto Parser::ParseComparison() -> ExprPtr {
   while (Match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
     Token op = Previous();
     ExprPtr right = ParseTerm();
-    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
+    expr = std::make_shared<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -417,7 +417,7 @@ auto Parser::ParseTerm() -> ExprPtr {
   while (Match(MINUS, PLUS)) {
     Token op = Previous();
     ExprPtr right = ParseFactor();
-    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
+    expr = std::make_shared<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -432,7 +432,7 @@ auto Parser::ParseFactor() -> ExprPtr {
   while (Match(SLASH, STAR)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    expr = std::make_unique<BinaryExpr>(move(expr), move(op), move(right));
+    expr = std::make_shared<BinaryExpr>(move(expr), move(op), move(right));
   }
 
   return expr;
@@ -445,7 +445,7 @@ auto Parser::ParseUnary() -> ExprPtr {
   if (Match(BANG, MINUS)) {
     Token op = Previous();
     ExprPtr right = ParseUnary();
-    return std::make_unique<UnaryExpr>(move(op), move(right));
+    return std::make_shared<UnaryExpr>(move(op), move(right));
   }
 
   return ParseCall();
@@ -462,7 +462,7 @@ auto Parser::ParseCall() -> ExprPtr {
     } else if (Match(TokenType::DOT)) {
       Token property =
           Consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
-      expr = std::make_unique<GetExpr>(move(expr), move(property));
+      expr = std::make_shared<GetExpr>(move(expr), move(property));
     } else {
       break;
     }
@@ -473,42 +473,42 @@ auto Parser::ParseCall() -> ExprPtr {
 
 auto Parser::ParsePrimary() -> ExprPtr {
   using enum TokenType;
-  using std::make_unique;
+  using std::make_shared;
   if (Match(FALSE)) {
-    return make_unique<LiteralExpr>(Object{false});
+    return make_shared<LiteralExpr>(Object{false});
   }
 
   if (Match(TRUE)) {
-    return make_unique<LiteralExpr>(Object{true});
+    return make_shared<LiteralExpr>(Object{true});
   }
 
   if (Match(NIL)) {
-    return make_unique<LiteralExpr>(Object{nullptr});
+    return make_shared<LiteralExpr>(Object{nullptr});
   }
 
   if (Match(NUMBER, STRING)) {
-    return make_unique<LiteralExpr>(Previous().GetLiteral());
+    return make_shared<LiteralExpr>(Previous().GetLiteral());
   }
 
   if (Match(SUPER)) {
     Token keyword = Previous();
     Consume(DOT, "Expect '.' after 'super'.");
     Token method = Consume(IDENTIFIER, "Expect superclass method name.");
-    return make_unique<SuperExpr>(std::move(keyword), std::move(method));
+    return make_shared<SuperExpr>(std::move(keyword), std::move(method));
   }
 
   if (Match(THIS)) {
-    return make_unique<ThisExpr>(Previous());
+    return make_shared<ThisExpr>(Previous());
   }
 
   if (Match(IDENTIFIER)) {
-    return make_unique<VariableExpr>(Previous());
+    return make_shared<VariableExpr>(Previous());
   }
 
   if (Match(LEFT_PAREN)) {
     ExprPtr expr = ParseExpression();
     Consume(RIGHT_PAREN, "Expect ')' after expression.");
-    return make_unique<GroupingExpr>(std::move(expr));
+    return make_shared<GroupingExpr>(std::move(expr));
   }
 
   throw Error(Peek(), "Expect expression.");
