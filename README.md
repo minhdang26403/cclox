@@ -1,4 +1,4 @@
-# Tree-Walk Interpreter in C++20
+# Tree-Walk Interpreter in C++
 
 This repository contains an implementation of a tree-walk interpreter inspired by part II of *Crafting Interpreters* by Robert Nystrom. The language and interpreter are implemented using modern C++20 features, with an emphasis on clarity, modularity, and extensibility.
 
@@ -62,7 +62,7 @@ The following features are currently implemented in the language:
 - [x] Functions
 - [x] Resolving and Binding
 - [x] Classes
-- [ ] Inheritance
+- [x] Inheritance
 
 ## Contributing
 Feel free to open issues or submit pull requests if you have suggestions or find bugs. Contributions are always welcome!

@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <ostream>
 #include <stdexcept>
 #include <variant>
@@ -61,10 +62,28 @@ auto Interpreter::operator()(const BlockStmtPtr& stmt) -> void {
 }
 
 auto Interpreter::operator()(const ClassStmtPtr& stmt) -> void {
-  const Token& class_name = stmt->GetClassName();
+  std::optional<Object> superclass_opt = std::nullopt;
+  const VariableExprPtr& superclass = stmt->GetSuperclass();
 
+  if (superclass) {
+    Object superclass_obj = EvaluateExpression(superclass);
+    if (!superclass_obj.IsLoxClass()) {
+      throw RuntimeError(superclass->GetVariable(),
+                         "Superclass must be a class.");
+    }
+    superclass_opt = superclass_obj;
+  }
+
+  const Token& class_name = stmt->GetClassName();
   environment_->Define(class_name.GetLexeme(), Object{nullptr});
+
+  if (superclass) {
+    environment_ = Environment::Create(environment_);
+    environment_->Define("super", superclass_opt.value());
+  }
+
   LoxClass::MethodMap methods;
+
   for (const auto& method_var : stmt->GetClassMethods()) {
     const auto& method = std::get<FunctionStmtPtr>(method_var);
     std::string method_name = method->GetFunctionName().GetLexeme();
@@ -74,8 +93,13 @@ auto Interpreter::operator()(const ClassStmtPtr& stmt) -> void {
     methods.emplace(std::move(method_name), std::move(function));
   }
 
-  auto klass =
-      std::make_shared<LoxClass>(class_name.GetLexeme(), std::move(methods));
+  auto klass = std::make_shared<LoxClass>(
+      class_name.GetLexeme(), std::move(superclass_opt), std::move(methods));
+
+  if (superclass) {
+    environment_ = environment_->GetEnclosingEnvironment();
+  }
+
   environment_->Assign(class_name, Object{klass});
 }
 
@@ -284,6 +308,29 @@ auto Interpreter::operator()(const SetExprPtr& expr) -> Object {
   Object value = EvaluateExpression(expr->GetValue());
   lox_instance_opt.value()->SetField(expr->GetProperty(), value);
   return value;
+}
+
+auto Interpreter::operator()(const SuperExprPtr& expr) -> Object {
+  size_t distance = locals_.at(expr);
+  Object superclass =
+      environment_->GetAt(distance, Token{TokenType::SUPER, "super"});
+  assert(distance > 0);
+  Object object =
+      environment_->GetAt(distance - 1, Token{TokenType::THIS, "this"});
+
+  auto superclass_ptr = static_pointer_cast<LoxClass>(
+      std::get<LoxCallablePtr>(superclass.Value()));
+  LoxCallablePtr method =
+      superclass_ptr->FindMethod(expr->GetMethod().GetLexeme());
+
+  if (method == nullptr) {
+    throw RuntimeError(
+        expr->GetMethod(),
+        std::format("Undefined property '{}'.", expr->GetMethod().GetLexeme()));
+  }
+
+  return Object{static_pointer_cast<LoxFunction>(method)->Bind(
+      std::get<LoxInstancePtr>(object.Value()))};
 }
 
 auto Interpreter::operator()(const ThisExprPtr& expr) -> Object {

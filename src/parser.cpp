@@ -106,6 +106,13 @@ auto Parser::ParseClassDeclaration() -> StmtPtr {
   using std::move;
 
   Token name = Consume(IDENTIFIER, "Expect class name.");
+
+  VariableExprPtr superclass;
+  if (Match(LESS)) {
+    Consume(IDENTIFIER, "Expect superclass name.");
+    superclass = std::make_shared<VariableExpr>(Previous());
+  }
+
   Consume(LEFT_BRACE, "Expect '{' before class body.");
 
   std::vector<StmtPtr> methods;
@@ -114,7 +121,8 @@ auto Parser::ParseClassDeclaration() -> StmtPtr {
   }
   Consume(RIGHT_BRACE, "Expect '}' after class body.");
 
-  return std::make_unique<ClassStmt>(move(name), move(methods));
+  return std::make_unique<ClassStmt>(move(name), move(superclass),
+                                     move(methods));
 }
 
 auto Parser::ParseFunction(std::string_view kind) -> StmtPtr {
@@ -480,6 +488,13 @@ auto Parser::ParsePrimary() -> ExprPtr {
 
   if (Match(NUMBER, STRING)) {
     return make_unique<LiteralExpr>(Previous().GetLiteral());
+  }
+
+  if (Match(SUPER)) {
+    Token keyword = Previous();
+    Consume(DOT, "Expect '.' after 'super'.");
+    Token method = Consume(IDENTIFIER, "Expect superclass method name.");
+    return make_unique<SuperExpr>(std::move(keyword), std::move(method));
   }
 
   if (Match(THIS)) {

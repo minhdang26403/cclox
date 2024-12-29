@@ -131,6 +131,10 @@ auto ASTPrinter::operator()(const SetExprPtr& expr) const -> std::string {
                      expr->GetProperty().GetLexeme(), Print(expr->GetValue()));
 }
 
+auto ASTPrinter::operator()(const SuperExprPtr& expr) const -> std::string {
+  return std::format("(super {})", expr->GetMethod().GetLexeme());
+}
+
 auto ASTPrinter::operator()([[maybe_unused]] const ThisExprPtr& expr) const
     -> std::string {
   return "this";

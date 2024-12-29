@@ -5,7 +5,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -63,47 +62,43 @@ class Object {
    * @brief Checks if the Object holds a boolean value.
    * @return `true` if the Object holds a boolean, `false` otherwise.
    */
-  auto IsBool() const noexcept -> bool {
-    return std::holds_alternative<bool>(value_);
-  }
+  auto IsBool() const noexcept -> bool;
 
   /**
    * @brief Checks if the Object holds a null pointer value.
    * @return `true` if the Object holds a null pointer, `false` otherwise.
    */
-  auto IsNil() const noexcept -> bool {
-    return std::holds_alternative<std::nullptr_t>(value_);
-  }
+  auto IsNil() const noexcept -> bool;
 
   /**
    * @brief Checks if the Object holds an integer value.
    * @return `true` if the Object holds an integer, `false` otherwise.
    */
-  auto IsInteger() const noexcept -> bool {
-    return std::holds_alternative<int32_t>(value_);
-  }
+  auto IsInteger() const noexcept -> bool;
 
   /**
    * @brief Checks if the Object holds a double value.
    * @return `true` if the Object holds a double, `false` otherwise.
    */
-  auto IsDouble() const noexcept -> bool {
-    return std::holds_alternative<double>(value_);
-  }
+  auto IsDouble() const noexcept -> bool;
 
   /**
    * @brief Checks if the Object holds a string value.
    * @return `true` if the Object holds a string, `false` otherwise.
    */
-  auto IsString() const noexcept -> bool {
-    return std::holds_alternative<std::string>(value_);
-  }
+  auto IsString() const noexcept -> bool;
+
+  auto IsLoxCallable() const noexcept -> bool;
+
+  auto IsLoxFunction() const noexcept -> bool;
+
+  auto IsLoxClass() const noexcept -> bool;
 
   /**
    * @brief Retrieves the stored value as a constant reference.
    * @return A constant reference to the stored value.
    */
-  const ValueType& Value() const noexcept { return value_; }
+  auto Value() const noexcept -> const ValueType&;
 
   /**
    * @brief Attempts to retrieve the stored value as an integer.

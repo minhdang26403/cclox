@@ -15,8 +15,11 @@ class LoxClass : public LoxCallable {
  public:
   using MethodMap = std::unordered_map<std::string, LoxCallablePtr>;
 
-  LoxClass(std::string name, MethodMap methods)
-      : name_(std::move(name)), methods_(std::move(methods)) {}
+  LoxClass(std::string name, std::optional<Object> superclass,
+           MethodMap methods)
+      : name_(std::move(name)),
+        superclass_(std::move(superclass)),
+        methods_(std::move(methods)) {}
 
   auto FindMethod(const std::string& name) const -> LoxCallablePtr;
 
@@ -29,6 +32,7 @@ class LoxClass : public LoxCallable {
 
  private:
   std::string name_;
+  std::optional<Object> superclass_;
   MethodMap methods_;
 };
 

@@ -49,10 +49,17 @@ class BlockStmt {
 
 class ClassStmt {
  public:
-  ClassStmt(Token name, std::vector<StmtPtr> methods)
-      : name_(std::move(name)), methods_(std::move(methods)) {}
+  ClassStmt(Token name, VariableExprPtr superclass,
+            std::vector<StmtPtr> methods)
+      : name_(std::move(name)),
+        superclass_(std::move(superclass)),
+        methods_(std::move(methods)) {}
 
   auto GetClassName() const noexcept -> const Token& { return name_; }
+
+  auto GetSuperclass() const noexcept -> const VariableExprPtr& {
+    return superclass_;
+  }
 
   auto GetClassMethods() const noexcept -> const std::vector<StmtPtr>& {
     return methods_;
@@ -60,6 +67,7 @@ class ClassStmt {
 
  private:
   Token name_;
+  VariableExprPtr superclass_;
   std::vector<StmtPtr> methods_;
 };
 

@@ -79,6 +79,8 @@ class ASTPrinter {
 
   auto operator()(const SetExprPtr& expr) const -> std::string;
 
+  auto operator()(const SuperExprPtr& expr) const -> std::string;
+
   auto operator()(const ThisExprPtr& expr) const -> std::string;
 
   /**

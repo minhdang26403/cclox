@@ -115,6 +115,8 @@ class Interpreter {
 
   auto operator()(const SetExprPtr& expr) -> Object;
 
+  auto operator()(const SuperExprPtr& expr) -> Object;
+
   auto operator()(const ThisExprPtr& expr) -> Object;
 
   /**

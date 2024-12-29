@@ -18,6 +18,7 @@ class GroupingExpr;
 class LiteralExpr;
 class LogicalExpr;
 class SetExpr;
+class SuperExpr;
 class ThisExpr;
 class UnaryExpr;
 class VariableExpr;
@@ -32,6 +33,7 @@ using GroupingExprPtr = std::shared_ptr<GroupingExpr>;
 using LiteralExprPtr = std::shared_ptr<LiteralExpr>;
 using LogicalExprPtr = std::shared_ptr<LogicalExpr>;
 using SetExprPtr = std::shared_ptr<SetExpr>;
+using SuperExprPtr = std::shared_ptr<SuperExpr>;
 using ThisExprPtr = std::shared_ptr<ThisExpr>;
 using UnaryExprPtr = std::shared_ptr<UnaryExpr>;
 using VariableExprPtr = std::shared_ptr<VariableExpr>;
@@ -39,7 +41,7 @@ using VariableExprPtr = std::shared_ptr<VariableExpr>;
 using ExprPtr =
     std::variant<AssignExprPtr, BinaryExprPtr, CallExprPtr, GetExprPtr,
                  GroupingExprPtr, LiteralExprPtr, LogicalExprPtr, SetExprPtr,
-                 ThisExprPtr, UnaryExprPtr, VariableExprPtr>;
+                 SuperExprPtr, ThisExprPtr, UnaryExprPtr, VariableExprPtr>;
 
 class AssignExpr {
  public:
@@ -202,6 +204,20 @@ class SetExpr {
   ExprPtr object_;
   Token property_;
   ExprPtr value_;
+};
+
+class SuperExpr {
+ public:
+  SuperExpr(Token keyword, Token method)
+      : keyword_(std::move(keyword)), method_(std::move(method)) {}
+
+  auto GetKeyword() const noexcept -> const Token& { return keyword_; }
+
+  auto GetMethod() const noexcept -> const Token& { return method_; }
+
+ private:
+  Token keyword_;
+  Token method_;
 };
 
 class ThisExpr {

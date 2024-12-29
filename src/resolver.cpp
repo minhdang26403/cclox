@@ -18,8 +18,25 @@ auto Resolver::operator()(const ClassStmtPtr& stmt) -> void {
   ClassType enclosing_class = current_class_;
   current_class_ = ClassType::CLASS;
 
-  Declare(stmt->GetClassName());
-  Define(stmt->GetClassName());
+  const Token& class_name = stmt->GetClassName();
+
+  Declare(class_name);
+  Define(class_name);
+
+  const VariableExprPtr& superclass = stmt->GetSuperclass();
+  const Token& superclass_name = superclass->GetVariable();
+
+  if (superclass && class_name.GetLexeme() == superclass_name.GetLexeme()) {
+    Lox::Error(interpreter_.GetOutputStream(), superclass_name,
+               "A class can't inherit from itself.");
+  }
+
+  if (superclass) {
+    current_class_ = ClassType::SUBCLASS;
+    ResolveExpression(superclass);
+    BeginScope();
+    scopes_.back().emplace("super", true);
+  }
 
   BeginScope();
   scopes_.back().emplace("this", true);
@@ -34,6 +51,10 @@ auto Resolver::operator()(const ClassStmtPtr& stmt) -> void {
   }
 
   EndScope();
+
+  if (superclass) {
+    EndScope();
+  }
 
   current_class_ = enclosing_class;
 }
@@ -148,6 +169,18 @@ auto Resolver::operator()(const LogicalExprPtr& expr) -> void {
 auto Resolver::operator()(const SetExprPtr& expr) -> void {
   ResolveExpression(expr->GetValue());
   ResolveExpression(expr->GetObject());
+}
+
+auto Resolver::operator()(const SuperExprPtr& expr) -> void {
+  if (current_class_ == ClassType::NONE) {
+    Lox::Error(interpreter_.GetOutputStream(), expr->GetKeyword(),
+               "Can't use 'super' outside of a class.");
+  } else if (current_class_ != ClassType::SUBCLASS) {
+    Lox::Error(interpreter_.GetOutputStream(), expr->GetKeyword(),
+               "Can't use 'super' in a class with no superclass.");
+  }
+
+  ResolveLocalVariable(ExprPtr{expr}, expr->GetKeyword());
 }
 
 auto Resolver::operator()(const ThisExprPtr& expr) -> void {

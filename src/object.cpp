@@ -6,9 +6,49 @@
 #include <variant>
 
 #include "lox_callable.h"
+#include "lox_class.h"
+#include "lox_function.h"
 #include "lox_instance.h"
 
 namespace cclox {
+auto Object::IsBool() const noexcept -> bool {
+  return std::holds_alternative<bool>(value_);
+}
+
+auto Object::IsNil() const noexcept -> bool {
+  return std::holds_alternative<std::nullptr_t>(value_);
+}
+
+auto Object::IsInteger() const noexcept -> bool {
+  return std::holds_alternative<int32_t>(value_);
+}
+
+auto Object::IsDouble() const noexcept -> bool {
+  return std::holds_alternative<double>(value_);
+}
+
+auto Object::IsString() const noexcept -> bool {
+  return std::holds_alternative<std::string>(value_);
+}
+
+auto Object::IsLoxCallable() const noexcept -> bool {
+  return std::holds_alternative<LoxCallablePtr>(value_);
+}
+
+auto Object::IsLoxFunction() const noexcept -> bool {
+  return IsLoxCallable() &&
+         dynamic_pointer_cast<LoxFunction>(std::get<LoxCallablePtr>(value_));
+}
+
+auto Object::IsLoxClass() const noexcept -> bool {
+  return IsLoxCallable() &&
+         dynamic_pointer_cast<LoxClass>(std::get<LoxCallablePtr>(value_));
+}
+
+auto Object::Value() const noexcept -> const ValueType& {
+  return value_;
+}
+
 auto Object::AsInteger() const noexcept -> std::optional<int32_t> {
   if (auto pval = std::get_if<int32_t>(&value_)) {
     return *pval;

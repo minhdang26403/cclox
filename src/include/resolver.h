@@ -52,6 +52,8 @@ class Resolver {
 
   auto operator()(const SetExprPtr& expr) -> void;
 
+  auto operator()(const SuperExprPtr& expr) -> void;
+
   auto operator()(const ThisExprPtr& expr) -> void;
 
   auto operator()(const UnaryExprPtr& expr) -> void;
@@ -70,6 +72,7 @@ class Resolver {
   enum class ClassType {
     NONE,
     CLASS,
+    SUBCLASS,
   };
 
  private:

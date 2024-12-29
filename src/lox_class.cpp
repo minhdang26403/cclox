@@ -12,6 +12,15 @@ auto LoxClass::FindMethod(const std::string& name) const -> LoxCallablePtr {
     return methods_.at(name);
   }
 
+  if (superclass_) {
+    std::optional<LoxCallablePtr> lox_callable = superclass_->AsLoxCallable();
+    // The `lox_callable` optional should contain a LoxCallPtr value. Otherwise,
+    // it's an unrecoverable error, so let the code throw an exception when
+    // calling `value()` on the optional.
+    auto superclass_ptr = static_pointer_cast<LoxClass>(lox_callable.value());
+    return superclass_ptr->FindMethod(name);
+  }
+
   return nullptr;
 }
 
