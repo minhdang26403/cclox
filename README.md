@@ -51,7 +51,7 @@ cd build/bin
 
 The `interpreter_test` executable runs all tests in the `test/` directory. To create your own tests, create a new directory for your test suite and add sample Lox programs and the expected output files from these programs.
 
-## Current Progress
+## Status
 The following features are currently implemented in the language:
 - [x] Scanning
 - [x] Representing Code
